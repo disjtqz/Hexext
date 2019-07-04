@@ -1,0 +1,443 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\internal">
+      <UniqueIdentifier>{e5029dfb-d56e-49f7-ab12-4eee92250bfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\microgen_additions">
+      <UniqueIdentifier>{32652841-770a-4adf-bce6-3675b3349e60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\microgen_additions">
+      <UniqueIdentifier>{6268cba6-f1b5-4c65-9fe5-9aa07eb61f84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\combine_rules">
+      <UniqueIdentifier>{10edab60-2e9c-4bea-9f9f-83a2106d18f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\combine_rules">
+      <UniqueIdentifier>{f8d907b8-de5c-4d76-b74b-948e3f8e9213}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hexutils">
+      <UniqueIdentifier>{5d156b86-f70b-4e13-89ad-c98ff0ee201b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\hexutils">
+      <UniqueIdentifier>{e03d268e-fe47-4671-b21b-9472d10be918}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mixins">
+      <UniqueIdentifier>{c5b087ec-f378-401c-a3ad-d277a2fa3d94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\preoptimization-postprocess">
+      <UniqueIdentifier>{704a60f9-f844-4a50-a015-7d7751479bdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\preoptimization-postprocess">
+      <UniqueIdentifier>{86612585-8421-4917-a82c-fc57280ee9ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mvm">
+      <UniqueIdentifier>{819292f9-7e92-4f1f-88bb-c1d719014c14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mvm">
+      <UniqueIdentifier>{a2a3546c-0cf3-4147-9908-2598e64b35e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ctree">
+      <UniqueIdentifier>{297ac2b9-4949-487e-b54e-551a48a19c69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ctree">
+      <UniqueIdentifier>{9f0a016f-197e-486e-8bd8-17cbbce1d61b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\exrole">
+      <UniqueIdentifier>{d6a93ef6-e2d8-409b-ba3d-35dfa932f1b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\exrole">
+      <UniqueIdentifier>{c636d5ea-2faa-4583-b5b4-53c2cb53ee31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\canon">
+      <UniqueIdentifier>{f6752301-e5cd-47bc-b8aa-a242db942539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\canon\bitsim">
+      <UniqueIdentifier>{8c0fe55e-510e-4256-987b-b4a3e3ba1275}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\exrole\role_names">
+      <UniqueIdentifier>{d82f66ff-c965-401e-a51c-e2346d61bb00}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="plugin_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mlist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="minsn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="micro_hooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="printers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="micromisc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mbl_array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\fixup_bittest_codegen.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\combine_shift_and.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\bnot_and_low.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\shift_mod_bitsize.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\bytewise_shift.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\add_masked_one_conditional.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="hexutils\hexutils.cpp">
+      <Filter>Source Files\hexutils</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\shiftx_codegen.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\avx_codegen.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\bitor_followed_by_signbit_extrq.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\raise_bitlut_test_to_multieq_compare.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\byte_shifts_and_adds_to_ors.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\division_magic_number_rules.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\shr_shl_bittest_by_same_variable.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\combine_cndop_and_xor_1.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\div_and_mul_by_same_const_to_mask.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="cs_core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\combine_x86_64_bitand_high.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\bmi1_codegen.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\combine_or_shift_seq.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\under_debugger_elim.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\remove_nullsub_calls.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\combine_core.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\microgen_core.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\thunk_function_resolver.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_base.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_arm32.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_x86_64.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_x86.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_aarch64.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="preoptimization-postprocess\prepostprocess.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+    <ClCompile Include="ctree\late_if_invert.cpp">
+      <Filter>Source Files\ctree</Filter>
+    </ClCompile>
+    <ClCompile Include="ctree\ctree.cpp">
+      <Filter>Source Files\ctree</Filter>
+    </ClCompile>
+    <ClCompile Include="microgen_additions\trivial_inliner.cpp">
+      <Filter>Source Files\microgen_additions</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\pow2_rounding_recognizers.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="exrole\exrole.cpp">
+      <Filter>Source Files\exrole</Filter>
+    </ClCompile>
+    <ClCompile Include="hexutils\potential_bits.cpp">
+      <Filter>Source Files\hexutils</Filter>
+    </ClCompile>
+    <ClCompile Include="mvm\mvm_x86_common.cpp">
+      <Filter>Source Files\mvm</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="micro_on_70.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexext_hash.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexext_hashdb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexext_ida.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexext_core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hexdefs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mcodexmacro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\micro_filter_api.hpp">
+      <Filter>Header Files\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\mregs_x86_64.hpp">
+      <Filter>Header Files\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\fixup_bittest_codegen.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_shift_and.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\bnot_and_low.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\shift_mod_bitsize.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\bytewise_shift.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\add_masked_one_conditional.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\hexutils.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\shiftx_codegen.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\avx_codegen.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\bitor_followed_by_signbit_extrq.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\raise_bitlut_test_to_multieq_compare.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\byte_shifts_and_adds_to_ors.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\division_magic_number_rules.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\shr_shl_bittest_by_same_variable.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_cndop_and_xor_1.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\div_and_mul_by_same_const_to_mask.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="cs_core.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_x86_64_bitand_high.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_rule_defs.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\bmi1_codegen.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="cs_intrin.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_or_shift_seq.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\under_debugger_elim.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\microgen_defs.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\remove_nullsub_calls.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\combine_core.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\microgen_core.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\idaregs_x86_64.hpp">
+      <Filter>Header Files\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="preoptimization-postprocess\prepostprocess.hpp">
+      <Filter>Header Files\preoptimization-postprocess</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\thunk_function_resolver.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\micro_executor_template.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_arm32.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_defs_internal.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_x86.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_x86_64.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_aarch64.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="ctree\late_if_invert.hpp">
+      <Filter>Header Files\ctree</Filter>
+    </ClInclude>
+    <ClInclude Include="ctree\ctree.hpp">
+      <Filter>Header Files\ctree</Filter>
+    </ClInclude>
+    <ClInclude Include="ctree\ctree_defs.hpp">
+      <Filter>Header Files\ctree</Filter>
+    </ClInclude>
+    <ClInclude Include="microgen_additions\trivial_inliner.hpp">
+      <Filter>Header Files\microgen_additions</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\pow2_rounding_recognizers.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="canon\canon.hpp">
+      <Filter>Header Files\canon</Filter>
+    </ClInclude>
+    <ClInclude Include="canon\bitsim\bitsim.hpp">
+      <Filter>Header Files\canon\bitsim</Filter>
+    </ClInclude>
+    <ClInclude Include="canon\bitsim\bitsim_impl.hpp">
+      <Filter>Header Files\canon\bitsim</Filter>
+    </ClInclude>
+    <ClInclude Include="canon\bitgraph.hpp">
+      <Filter>Header Files\canon</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\exrole_internal.hpp">
+      <Filter>Header Files\exrole</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\exrole_exmacro.hpp">
+      <Filter>Header Files\exrole</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\exrole.hpp">
+      <Filter>Header Files\exrole</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\xmacro_x86_mvm_regs.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\xmacro_x86_64_mvm_regs.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="mvm\mvm_x86_common.hpp">
+      <Filter>Header Files\mvm</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\traverse_micro.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\tzcnt.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\popcnt.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\lzcnt.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\pld.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\rbit.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\byteshr128.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\xor128.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\allrolenames.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\and128.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\or128.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\loada128.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="mixins\set_codegen_small.mix">
+      <Filter>Header Files\mixins</Filter>
+    </None>
+    <None Include="mixins\revert_codegen.mix">
+      <Filter>Header Files\mixins</Filter>
+    </None>
+  </ItemGroup>
+</Project>

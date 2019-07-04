@@ -1,0 +1,19 @@
+#pragma once
+#include <ida.hpp>
+#include <idp.hpp>
+#include <loader.hpp>
+#include <kernwin.hpp>
+#include <ieee.h>
+#include <hexrays.hpp>
+#include <functional>
+#include <array>
+#include <list>
+#include <string>
+#include "../cs_core.hpp"
+#include <intrin.h>
+
+#include "../cs_intrin.hpp"
+#include "../micro_on_70.hpp"
+#include "../exrole/exrole.hpp"
+#include "../mvm/mvm.hpp"
+#include "../hexutils/hexutils.hpp"

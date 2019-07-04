@@ -1,0 +1,3 @@
+#ifdef HEXEXT_RELEASE
+#pragma optimize( "ts", on )
+#endif
