@@ -17,7 +17,13 @@ mreg_t mr_eax = -1, mr_ebx = -1,
 mr_ecx = -1, mr_edx = -1;
 
 static int reg2mreg_using_cdg(unsigned r, mreg_t* out, qstring* regname, unsigned* size_out) {
+	/*
+		ye gods, here be dark magicks
+		
 
+		we're tricking the decompiler into telling us the whole layout of the mvm register file in a way
+		that works on all four 7.0 decompilers ;)
+	*/
 	struct blank_codegen_t {
 		void* vftbl;
 
@@ -41,12 +47,11 @@ static int reg2mreg_using_cdg(unsigned r, mreg_t* out, qstring* regname, unsigne
 	}
 	/*
 		special case. this was causing crashes on ARM64
+		possibly arm32 too? havent verified yet
 	*/
-//#ifdef __EA64__
 	if (hexext::currarch() == hexext_arch_e::ARM && !strcmp(regname->c_str(), "PC")) {
 		return -1;
 	}
-//#endif
 
 	//cs_assert(!regname.empty());
 	if (regname->empty() && r > 2000)

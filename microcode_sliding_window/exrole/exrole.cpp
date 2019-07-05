@@ -25,19 +25,20 @@ struct split_exrole_comp_t {
 	unsigned m_len;
 	unsigned m_hashcode;
 	constexpr bool operator <(const split_exrole_comp_t& other)const {
-		auto stresult = cs::const_ops::ctstrcmp(m_name, other.m_name);
-
-		if (!stresult)
-			return false;
 
 		if (m_hashcode == other.m_hashcode) {
-			return m_len < other.m_len;
+			if (m_len < other.m_len) {
+				return true;
+			}
+			else {
+				return cs::const_ops::ctstrcmp(m_name, other.m_name) < 0;
+
+			}
 		}
 		else {
 			return m_hashcode < other.m_hashcode;
 		}
 
-		//return (m_length < other.m_length || m_hash < other.m_hash || cs::const_ops::ctstrcmp( m_name, other.m_name) < 0);// || !cs::const_ops::cstreq(m_name, other.m_name);//strcmp(m_name, other.m_name) != 0;
 	}
 
 };

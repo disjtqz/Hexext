@@ -304,7 +304,7 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 				another shitty fixup, but the postpreopt pass will probably spoil all of the lists anyway
 			*/
 			for (mblock_t* blk = mba->blocks; blk; blk = blk->nextb) {
-				blk->flags &= ~8;
+				blk->flags &= ~MBL_LIST;
 			}
 			//havent checked yet to see if preoptimization honors MERR_LOOP. rerunning preoptimization probably wont have many benefits anyway
 			//return MERR_LOOP;

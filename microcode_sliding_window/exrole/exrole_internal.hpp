@@ -46,6 +46,7 @@ struct cs_funcset_submit_t {
 	const char* m_name;
 	exrole_t m_role;
 	constexpr bool operator <(const cs_funcset_submit_t& other)const {
+#if 0
 		auto stresult = cs::const_ops::ctstrcmp(m_name, other.m_name);
 
 		if (!stresult)
@@ -59,6 +60,21 @@ struct cs_funcset_submit_t {
 		}
 
 		//return ((m_len < other.m_len || m_hashcode < other.m_hashcode ||  );
+#else
+
+		if (m_hashcode == other.m_hashcode) {
+			if (m_len < other.m_len) {
+				return true;
+			}
+			else {
+				return cs::const_ops::ctstrcmp(m_name, other.m_name) < 0;
+
+			}
+		}
+		else {
+			return m_hashcode < other.m_hashcode;
+		}
+#endif
 
 	}
 	//cs_funcclass_t m_cls;

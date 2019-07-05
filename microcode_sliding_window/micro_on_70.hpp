@@ -1087,6 +1087,8 @@ enum mblock_type_t
 	BLT_XTRN = 6, ///< external block (out of function address)
 };
 #define MBL_PUSH	0x10
+#define MBL_PROP   (1 << 10)
+#define MBL_INCONST (1<< 0xBu)
 #define MBL_FAKE	0x200
 #define MBL_LIST	8
 #ifdef __EA64__
@@ -1118,7 +1120,7 @@ struct mblock_t
 #define MBL_DSLOT       0x4000  ///< block for delay slot
 #define MBL_VALRANGES   0x8000  ///< should optimize using value ranges*/
 
-
+#if 0
 	void* vtable;
 	mblock_t* nextb;
 	mblock_t* prevb;
@@ -1174,6 +1176,44 @@ struct mblock_t
 	_QWORD minbargref;
 	qvector<int> predset;
 	qvector<int> succset;
+
+#else
+	void* vtable;
+	mblock_t* nextb;
+	mblock_t* prevb;
+	int flags;
+	_BYTE gap_1C[4];
+	_QWORD field_20;
+	_QWORD field_28;
+	_QWORD field_30;
+	ea_t start;
+	ea_t end;
+	minsn_t* head;
+	minsn_t* tail;
+	_QWORD field_58;
+	_DWORD field_60;
+	_BYTE gap_64[4];
+	_QWORD field_68;
+	_QWORD field_70;
+	_QWORD field_78;
+	mlist_t mustbuse;
+	mlist_t maybuse;
+	mlist_t mustbdef;
+	mlist_t maybdef;
+	_QWORD field_120;
+	_DWORD field_128;
+	_BYTE gap_12C[4];
+	int serial;
+	_BYTE gap_134[4];
+	mbl_array_t* mba;
+	_DWORD type;
+	_BYTE gap_144[4];
+	_QWORD maxbsp;
+	_QWORD minbstkref;
+	_QWORD minbargref;
+	qvector<int> predset;
+	qvector<int> succset;
+#endif
 	DEFINE_MEMORY_ALLOCATION_FUNCS()
 };
 #else

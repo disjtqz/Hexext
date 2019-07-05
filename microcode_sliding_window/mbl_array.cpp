@@ -181,7 +181,7 @@ minsn_t* __fastcall mblock_t::remove_from_block(minsn_t* m)
 	this->field_68 = 0i64;
 	this->field_70 = 0i64;
 	this->field_78 = 0i64;
-	this->field_80 = 0i64;
+/*	this->field_80 = 0i64;
 	this->field_88 = 0;
 	this->field_90 = 0i64;
 	this->field_98 = 0i64;
@@ -200,7 +200,7 @@ minsn_t* __fastcall mblock_t::remove_from_block(minsn_t* m)
 	this->field_100 = 0;
 	this->field_108 = 0i64;
 	this->field_110 = 0i64;
-	this->field_118 = 0i64;
+	this->field_118 = 0i64;*/
 	this->field_120 = 0i64;
 	this->field_128 = 0;
 	
@@ -210,7 +210,7 @@ minsn_t* __fastcall mblock_t::remove_from_block(minsn_t* m)
 	this->tail = 0i64;
 	this->serial = 0;
 	this->mba = 0i64;
-	this->field_140 = 0;
+	this->type = 0;
 	this->maxbsp = 0i64;
 	this->minbstkref = 0i64;
 	this->minbargref = 0i64;

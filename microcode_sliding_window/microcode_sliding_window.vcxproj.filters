@@ -70,6 +70,9 @@
     <Filter Include="Header Files\exrole\role_names">
       <UniqueIdentifier>{d82f66ff-c965-401e-a51c-e2346d61bb00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Releases">
+      <UniqueIdentifier>{92cf19eb-9b13-46e2-8490-bd79f4385454}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="plugin_main.cpp">
@@ -438,6 +441,12 @@
     </None>
     <None Include="mixins\revert_codegen.mix">
       <Filter>Header Files\mixins</Filter>
+    </None>
+    <None Include="..\Releases\hexext.dll">
+      <Filter>Releases</Filter>
+    </None>
+    <None Include="..\Releases\hexext64.dll">
+      <Filter>Releases</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -33,9 +33,6 @@ static ctree_rule_t g_allrules[] = {
 void toggle_ctree_rules(bool install) {
 	
 	for (auto&& rule : g_allrules) {
-		hexext::install_ctree_transformation_rule(CMAT_TRANS1, rule, install);
-		hexext::install_ctree_transformation_rule(CMAT_BUILT, rule, install);
-		hexext::install_ctree_transformation_rule(CMAT_NICE, rule, install);
-		hexext::install_ctree_transformation_rule(CMAT_TRANS3, rule, install);
+		hexext::install_ctree_transformation_rule(CMAT_TRANS2, rule, install);
 	}
 }

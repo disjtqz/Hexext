@@ -527,30 +527,9 @@ bool simd_ld_shrtrim_t::run_combine(mcombine_t* state) {
 		return false;
 	mop_t copyop;
 	copyop = *left128;
-	/*
-	if (left128->t == mop_d && left128->d->opcode == m_ldx) {
 
-
-		insn->opcode = m_ldx;
-
-		mop_t selector = copyop.d->l;
-
-
-		copyop.d->l.make_number(8, sizeof(ea_t));
-		copyop.d->d.size = sizeof(ea_t);
-		copyop.size = sizeof(ea_t);
-		copyop.d->opcode = m_add;
-
-		insn->r = copyop;
-		copyop = selector;
-
-
-	}
-	else {
-	*/
-		insn->opcode = m_high;
+	insn->opcode = m_high;
 		
-	//}
 
 	
 	insn->l = copyop;

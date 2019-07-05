@@ -11,6 +11,7 @@ static bool combine_x86_64_bitand_high(mblock_t* block, minsn_t* insn) {
 	if (!is_mcode_zf_cond(insn->opcode))
 		return false;
 
+	
 
 	mop_t* nonconst;
 	mop_t* cmpconst = insn->get_eitherlr(mop_n, &nonconst);
@@ -66,6 +67,11 @@ static bool combine_x86_64_bitand_high(mblock_t* block, minsn_t* insn) {
 	andreg->size = defsize;
 	nonconst->size = defsize;
 	cmpconst->size = defsize;
+	/*block->mustbuse.reg.add_(andreg->r, andreg->size);
+	block->maybuse.reg.add_(andreg->r, andreg->size);
+	block->flags &= ~MBL_LIST;
+	
+	block->flags |= /*MBL_PROP | MBL_INCONST;*/
 
 
 	return true;
@@ -100,8 +106,13 @@ static bool combine_x86_64_bitor_high(mblock_t* block, minsn_t* insn) {
 	return true;
 }
 
+/*
+	disabled. this one changes the blocks use lists so bad idea for now hombre
+*/
+
 bool combine_x86_band_high_t::run_combine(mcombine_t* state) {
-	return combine_x86_64_bitand_high(state->block(), state->insn());
+//	return combine_x86_64_bitand_high(state->block(), state->insn());
+	return false;
 }
 
 const char* combine_x86_band_high_t::name() const {

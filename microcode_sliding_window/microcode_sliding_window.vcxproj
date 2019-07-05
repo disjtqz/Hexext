@@ -243,11 +243,11 @@
     <TargetName>hexext</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='conf70-32-release|x64'">
-    <OutDir>C:\Users\Chris\Desktop\IDA 7.0\plugins</OutDir>
+    <OutDir>$(ProjectDir)\..\Releases</OutDir>
     <TargetName>hexext</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='conf70-release-build|x64'">
-    <OutDir>C:\Users\Chris\Desktop\IDA 7.0\plugins</OutDir>
+    <OutDir>$(ProjectDir)\..\Releases</OutDir>
     <TargetName>hexext64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='output-preprocessed|x64'">
@@ -660,6 +660,8 @@
     <ClInclude Include="preoptimization-postprocess\prepostprocess.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\Releases\hexext.dll" />
+    <None Include="..\Releases\hexext64.dll" />
     <None Include="mixins\revert_codegen.mix" />
     <None Include="mixins\set_codegen_small.mix" />
   </ItemGroup>
