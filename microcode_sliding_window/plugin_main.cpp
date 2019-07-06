@@ -67,7 +67,7 @@ int idaapi init(void)
 
 	if (!strcmp("7.0.0.170914", hexver)) {
 
-		hexext::install_glbopt_cb(dump_microcode_);
+		//hexext::install_glbopt_cb(dump_microcode_);
 		msg("Hexext is loaded! Use Ctrl-2 to toggle optimizations on and off!\n");
 		
 		
