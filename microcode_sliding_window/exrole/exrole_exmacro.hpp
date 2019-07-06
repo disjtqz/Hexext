@@ -16,3 +16,9 @@ FCLASS(loadu128)
 FCLASS(loada128)
 FCLASS(storeu128)
 FCLASS(storea128)
+FCLASS(vmulf32) //vector multiply float32s by float32s
+FCLASS(vmulf64) //vector multiply float64s by float64s
+FCLASS(vaddf32)
+FCLASS(vaddf64)
+FCLASS(vsubf32)
+FCLASS(vsubf64)

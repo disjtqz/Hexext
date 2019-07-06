@@ -49,13 +49,14 @@ static bool combine_or_shift_seq(mblock_t* block, minsn_t* insn) {
 	unsigned unitsize = non_innershl->size;
 
 	
-	minsn_t* innerguy1 = new minsn_t(BADADDR);
+	minsn_t* innerguy1 = new minsn_t(shlinnerinsn->ea);
 
-	minsn_t* innerguy2 = new minsn_t(BADADDR);
+	minsn_t* innerguy2 = new minsn_t(shlinnerinsn->ea);
 
 	innerguy1->opcode = m_shl;
 	innerguy2->opcode = m_shl;
-
+	innerguy1->d.size = unitsize;
+	innerguy2->d.size = unitsize;
 	innerguy1->l = *non_innershl;
 
 	innerguy2->l = shlinnerinsn->l;
@@ -66,6 +67,7 @@ static bool combine_or_shift_seq(mblock_t* block, minsn_t* insn) {
 
 	innerguy1->r = insn->r;
 	insn->opcode = m_or;
+
 	insn->l.erase();
 	insn->r.erase();
 	insn->l.assign_insn(innerguy1, unitsize);

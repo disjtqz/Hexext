@@ -8,11 +8,6 @@
 #include <functional>
 #include <array>
 #include <list>
-#include "hexext_hash.hpp"
-#include "hexext_hashdb.h"
-
-
-#include "hexext_core.hpp"
 
 #include "micro_on_70.hpp"
 #include "hexdefs.hpp"

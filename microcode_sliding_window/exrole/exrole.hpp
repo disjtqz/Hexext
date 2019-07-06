@@ -70,3 +70,7 @@ static inline exrole_call_binary_t extract_binary_exrole(minsn_t* insn, exrole_t
 	return { &insn->d.f->args[0], &insn->d.f->args[1] };
 
 }
+/*
+	finds the extended role for a call to a helper function and tags the instruction with the corresponding role
+*/
+bool find_and_tag_helper_exrole(minsn_t* inner);

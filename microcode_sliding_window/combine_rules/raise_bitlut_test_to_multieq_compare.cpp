@@ -43,6 +43,7 @@ static bool raise_bitlut_test_to_multieq_impl(mblock_t* blk, minsn_t* insn, mins
 		insn->r.t = mop_n;
 		insn->r.size = compsize;
 		insn->r.nnn = new mnumber_t(against, ea, n);
+		insn->d.size = 1;
 		return insn;
 	};
 	std::vector<minsn_t*> chain{};

@@ -3,16 +3,6 @@
 
 std::array<std::set<ctree_rule_t>, CMAT_FINAL + 1> g_rules;
 
-void hexext::install_ctree_transformation_rule(ctree_maturity_t maturity, ctree_rule_t rule, bool install) {
-	auto& ruleset = g_rules[maturity];
-
-	if (install) {
-		ruleset.insert(rule);
-	}
-	else {
-		ruleset.erase(rule);
-	}
-}
 
 
 bool hexext::execute_ctree_rules(cfunc_t* cfunc, ctree_maturity_t maturity) {
@@ -26,6 +16,18 @@ bool hexext::execute_ctree_rules(cfunc_t* cfunc, ctree_maturity_t maturity) {
 	return didchange;
 }
 #include "late_if_invert.hpp"
+#include "../mixins/set_codegen_small.mix"
+void hexext::install_ctree_transformation_rule(ctree_maturity_t maturity, ctree_rule_t rule, bool install) {
+	auto& ruleset = g_rules[maturity];
+
+	if (install) {
+		ruleset.insert(rule);
+	}
+	else {
+		ruleset.erase(rule);
+	}
+}
+
 static ctree_rule_t g_allrules[] = {
 	perform_late_if_inversion
 };
@@ -36,3 +38,4 @@ void toggle_ctree_rules(bool install) {
 		hexext::install_ctree_transformation_rule(CMAT_TRANS2, rule, install);
 	}
 }
+#include "../mixins/revert_codegen.mix"

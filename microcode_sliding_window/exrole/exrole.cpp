@@ -49,7 +49,7 @@ struct build_exrole_luts_t {
 	template<typename T, typename... Ts>
 	static constexpr auto build_flat_funcset_impl(fixed_size_vector_t<cs_funcset_submit_t, 1024>& st, const T& v, const Ts& ... rest) {
 
-		v.add_to_tree(st);
+		v.add_to_roleset(st);
 
 		if constexpr (sizeof...(rest)) {
 			build_flat_funcset_impl(st, rest...);
@@ -185,6 +185,27 @@ struct traversal_traits_tag_exrole_t {
 	static constexpr bool may_term_flow = false;
 
 };
+
+static CS_FORCEINLINE bool find_and_tag_helper_exrole_inline(minsn_t* inner) {
+	if (inner->op() != m_call)
+		return false;
+
+	if (inner->l.t != mop_h)
+		return false;
+
+	exrole_t role = generate_role_for_helper_name(inner->l.helper);
+
+	if (role == exrole_t::none)
+		return false;
+
+	cs_assert(inner->d.t == mop_f);
+
+	inner->d.f->role = (funcrole_t)encode_exrole(role);
+	return true;
+}
+bool find_and_tag_helper_exrole(minsn_t* inner) {
+	return find_and_tag_helper_exrole_inline(inner);
+}
 /*
 Traverse all instructions of the current function and tag them with their extended roles
 */
@@ -197,21 +218,7 @@ void tag_helpers_with_exrole(mbl_array_t* mba) {
 					return;
 
 				minsn_t* inner = mop->d;
-				if (inner->op() != m_call)
-					return;
-
-				if (inner->l.t != mop_h)
-					return;
-
-				exrole_t role = generate_role_for_helper_name(inner->l.helper);
-
-				if (role == exrole_t::none)
-					return;
-
-				cs_assert(inner->d.t == mop_f);
-
-				inner->d.f->role = (funcrole_t)encode_exrole(role);
-
+				find_and_tag_helper_exrole_inline(inner);
 
 			});
 

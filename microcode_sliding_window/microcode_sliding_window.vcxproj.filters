@@ -213,21 +213,18 @@
     <ClCompile Include="mvm\mvm_x86_common.cpp">
       <Filter>Source Files\mvm</Filter>
     </ClCompile>
+    <ClCompile Include="combine_rules\simd_bitops_simplify.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\rewrite_float_bitops.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="hexutils\codegen_utils.cpp">
+      <Filter>Source Files\hexutils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="micro_on_70.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hexext_hash.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hexext_hashdb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hexext_ida.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="hexext_core.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hexdefs.hpp">
@@ -433,6 +430,27 @@
     </ClInclude>
     <ClInclude Include="exrole\role_names\loada128.hpp">
       <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\vmulf32.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\vmulf64.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\vaddf32.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="exrole\role_names\vaddf64.hpp">
+      <Filter>Header Files\exrole\role_names</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\simd_bitops_simplify.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\rewrite_float_bitops.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\codegen_utils.hpp">
+      <Filter>Header Files\hexutils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -16,6 +16,11 @@ rlist_t rlist_tempregs{};
 mreg_t mr_eax = -1, mr_ebx = -1,
 mr_ecx = -1, mr_edx = -1;
 
+std::vector<mreg_info_t> g_mreg_info{};
+unsigned g_max_mreg = 0;
+static bool g_did_init_mregs = false;
+#include "../mixins/set_codegen_small.mix"
+
 static int reg2mreg_using_cdg(unsigned r, mreg_t* out, qstring* regname, unsigned* size_out) {
 	/*
 		ye gods, here be dark magicks
@@ -84,10 +89,18 @@ static int reg2mreg_using_cdg(unsigned r, mreg_t* out, qstring* regname, unsigne
 	return 1;
 }
 
+static int compare_mreg_info(const void* _x, const void* _y) {
+	const mreg_info_t* x = reinterpret_cast<const mreg_info_t*>(_x);
+	const mreg_info_t* y = reinterpret_cast<const mreg_info_t*>(_y);
 
-std::vector<mreg_info_t> g_mreg_info{};
-unsigned g_max_mreg = 0;
-static bool g_did_init_mregs = false;
+	if (x->m_micro_reg == y->m_micro_reg)
+		return 0;
+	else if (x->m_micro_reg < y->m_micro_reg)
+		return -1;
+	else
+		return 1;
+}
+
 static void preinit_mreg_info() {
 	g_max_mreg = 0;
 
@@ -120,13 +133,16 @@ static void preinit_mreg_info() {
 	//yeah this is garbage
 	g_mreg_info.pop_back();
 
-
+	/*
 	std::sort(&g_mreg_info[0], &g_mreg_info[g_max_mreg], [](const mreg_info_t & x, const mreg_info_t & y) {
 
 		return x.m_micro_reg < y.m_micro_reg;
 
 		});
+		*/
 
+	//use qsort for smaller binary size
+	qsort(&g_mreg_info[0], g_max_mreg, sizeof(mreg_info_t), compare_mreg_info);
 	g_did_init_mregs = true;
 
 
@@ -216,7 +232,7 @@ mreg_info_t* _mvm_internal::find_mreg_by_name(const char* name) {
 	cs_assert(false);
 
 }
-
+CS_COLD_CODE
 void ensure_mvm_init() {
 	if (g_did_init_mregs)
 		return;
@@ -266,6 +282,8 @@ void _mvm_internal::add_tempreg_to_list(const char* name) {
 	rlist_tempregs.add_(mr->m_micro_reg, mr->m_size);
 
 }
+
+#include "../mixins/revert_codegen.mix"
 
 bool mreg_has_highbyte_x86(mreg_t mr) {
 	cs_assert(hexext::currarch() == hexext_arch_e::x86);

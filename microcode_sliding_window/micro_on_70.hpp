@@ -1,5 +1,4 @@
 #pragma once
-#include "hexext_core.hpp"
 #include "hexdefs.hpp"
 #include "cs_core.hpp"
 template<typename T>
@@ -1772,7 +1771,9 @@ struct hexext_micro_filter_t
 
 
 namespace hexext_internal {
+	CS_COLD_CODE
 	void init_hexext();
+	CS_COLD_CODE
 	void deinit_hexext();
 }
 
@@ -1815,7 +1816,21 @@ public:
 		return run_combine(state);
 	}
 };
+#define		COMB_RULE_NAME(nam)	virtual const char* name() const override {	return nam; }
 
+#define		COMB_RULE_RUN()		virtual bool run_combine(mcombine_t* state)
+
+#define		COMB_RULE_DECL(identifer, nam)	\
+class identifer##_t : public mcombiner_rule_t {\
+public:\
+	COMB_RULE_NAME(nam);\
+COMB_RULE_RUN();\
+};\
+extern identifer##_t identifer;
+
+#define		COMB_RULE_IMPLEMENT(identifier)	\
+identifier##_t identifier{};\
+bool identifier##_t ::run_combine(mcombine_t* state)
 
 using combine_cb_t = mcombiner_rule_t*;
 using asmrewrite_cb_t = bool (*)(insn_t&);
@@ -1829,32 +1844,40 @@ enum class hexext_arch_e {
 	ARM
 };
 namespace hexext {
-	 void install_glbopt_cb(glbopt_cb_t cb);
+	CS_COLD_CODE
+	void install_glbopt_cb(glbopt_cb_t cb);
+	CS_COLD_CODE
+	void install_combine_cb(combine_cb_t cb);
+	CS_COLD_CODE
+	void remove_combine_cb(combine_cb_t cb);
+	CS_COLD_CODE
+	void install_combine_cb(combine_cb_t cb, bool enabled);
+	CS_COLD_CODE
+	void install_microcode_generated_cb(microcode_generated_cb_t cb);
+	CS_COLD_CODE
+	void install_microcode_filter_ex(hexext_micro_filter_t* mcu, bool install = true);
+	CS_COLD_CODE
+	void install_locopt_cb(locopt_cb_t cb, bool enabled);
+	CS_COLD_CODE
+	void install_preopt_cb(preopt_cb_t cb, bool enabled);
+	CS_COLD_CODE
+	void install_asm_rewriter(asmrewrite_cb_t cb);
+	CS_COLD_CODE
+	void remove_asm_rewriter(asmrewrite_cb_t cb);
+	CS_COLD_CODE
+	void install_asm_rewriter(asmrewrite_cb_t cb, bool enabled);
 
-	 void install_combine_cb(combine_cb_t cb);
-	 void remove_combine_cb(combine_cb_t cb);
+	unsigned get_parent_mop_size();
 
-	 void install_combine_cb(combine_cb_t cb, bool enabled);
-	 void install_microcode_generated_cb(microcode_generated_cb_t cb);
-	 void install_microcode_filter_ex(hexext_micro_filter_t* mcu, bool install = true);
-	 void install_locopt_cb(locopt_cb_t cb, bool enabled);
-	 void install_preopt_cb(preopt_cb_t cb, bool enabled);
-	 void install_asm_rewriter(asmrewrite_cb_t cb);
-	 void remove_asm_rewriter(asmrewrite_cb_t cb);
+	minsn_t* current_topinsn();
+	mop_t* current_comb_mop();
+	hexext_arch_e currarch();
+	/*
+	decode instruction ran through asm rewrite callbacks
+	*/
+	ea_t microgen_decode_prev_insn(insn_t* insn, ea_t ea);
 
-	 void install_asm_rewriter(asmrewrite_cb_t cb, bool enabled);
-
-	 unsigned get_parent_mop_size();
-
-	 minsn_t* current_topinsn();
-	 mop_t* current_comb_mop();
-	 hexext_arch_e currarch();
-	 /*
-		decode instruction ran through asm rewrite callbacks
-	 */
-	 ea_t microgen_decode_prev_insn(insn_t* insn, ea_t ea);
-
-	 int microgen_decode_insn(insn_t* insn, ea_t ea);
+	int microgen_decode_insn(insn_t* insn, ea_t ea);
 }
 
 #include <string>
@@ -2184,6 +2207,7 @@ minsn_t* new_helper(
 /*
 	Initializes the MVM for the current architecture if it is not already initialized
 */
+CS_COLD_CODE
 void ensure_mvm_init();
 
 cfunc_t* get_cached_cfunc(ea_t ea);

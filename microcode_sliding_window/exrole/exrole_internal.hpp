@@ -46,21 +46,6 @@ struct cs_funcset_submit_t {
 	const char* m_name;
 	exrole_t m_role;
 	constexpr bool operator <(const cs_funcset_submit_t& other)const {
-#if 0
-		auto stresult = cs::const_ops::ctstrcmp(m_name, other.m_name);
-
-		if (!stresult)
-			return false;
-
-		if (m_hashcode == other.m_hashcode) {
-			return m_len < other.m_len;
-		}
-		else {
-			return m_hashcode < other.m_hashcode;
-		}
-
-		//return ((m_len < other.m_len || m_hashcode < other.m_hashcode ||  );
-#else
 
 		if (m_hashcode == other.m_hashcode) {
 			if (m_len < other.m_len) {
@@ -74,7 +59,6 @@ struct cs_funcset_submit_t {
 		else {
 			return m_hashcode < other.m_hashcode;
 		}
-#endif
 
 	}
 	//cs_funcclass_t m_cls;
@@ -92,15 +76,13 @@ public:
 	{}
 
 	template<unsigned n>
-	//void add_to_tree(cs_funcclass_tree_t& tr) const {
 
-	constexpr void add_to_tree(fixed_size_vector_t<cs_funcset_submit_t, n>& tree) const{
+	constexpr void add_to_roleset(fixed_size_vector_t<cs_funcset_submit_t, n>& tree) const{
 		for (unsigned i = 0; i < sizeof...(Ts); ++i) {
 			auto&& descr = m_arr[i];
 			cs_funcset_submit_t sub{ descr.length(),descr.hashcode(),descr.name(),m_cls };
 
 			tree.push_back(sub);
-			//tr[sub] = m_cls;
 		}
 	}
 

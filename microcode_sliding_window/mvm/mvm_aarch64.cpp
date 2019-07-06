@@ -1,6 +1,9 @@
 #include "mvm_defs_internal.hpp"
 #ifdef __EA64__
+
+
 #include "mvm_aarch64.hpp"
+#include "../mixins/set_codegen_small.mix"
 /*
 	it looks like there are FOUR DIFFERENT FUCKING POSSIBLE REGISTER FILE LAYOUTS FOR AARCH64
 	in every layout the tempregs have different predecessors in the file
@@ -44,5 +47,5 @@ void mvm_aarch64_init() {
 
 	//insert_abs_mreg("cs", find_mreg_by_name("pc")->m_micro_reg + sizeof(ea_t), 2);
 }
-
+#include "../mixins/revert_codegen.mix"
 #endif

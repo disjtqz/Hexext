@@ -3,7 +3,6 @@
 
 #include "traverse_micro.hpp"
 
-minsn_t* chain_setops_with_or(std::vector<minsn_t*>& chain, ea_t iea);
 
 struct mulp2_const_t {
 	mop_t* m_numop;
@@ -352,5 +351,7 @@ bool gather_equal_valnums_in_block(mblock_t* blk, mop_t* mop, fixed_size_vecptr_
 static inline bool mop_seems_floaty_p(mop_t* mop) {
 	return (mop->oprops & OPROP_FLOAT) || (mop->t == mop_d && mop->d->is_fpinsn());
 }
+
+#include "codegen_utils.hpp"
 
 #include "micro_executor_template.hpp"

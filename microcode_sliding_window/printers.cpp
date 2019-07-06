@@ -10,9 +10,9 @@
 #include <array>
 #include <list>
 #include <string>
-
-#include "micro_on_70.hpp"
 #include "cs_core.hpp"
+#include "micro_on_70.hpp"
+
 
 #include "mixins/set_codegen_small.mix"
 

@@ -11,9 +11,7 @@
 #include <string>
 
 
-#include "hexext_core.hpp"
 #include "micro_on_70.hpp"
-#include "internal/idaregs_x86_64.hpp"
 #include "cs_core.hpp"
 #define __fastcall
 

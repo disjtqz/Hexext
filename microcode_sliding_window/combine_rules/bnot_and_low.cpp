@@ -5,75 +5,39 @@
 and (bnot (low (shr (ldx ds.2, (add rcx.8, #4.8).8).4, #4.1).4, .-1).1, .-1).1, #1.1, rax.1
 
 */
+
+/*
+ Take (~(x) & 1) and turn it into (x) & 1 == 0
+ GCC likes to generate conditionals like these on ARM32 and x86-64
+*/
 static bool combine_bnot_and_1_impl(mblock_t* blk, minsn_t* insn_) {
-	if (hexext::get_parent_mop_size() == -1 || is_definitely_topinsn_p(insn_)) //this one cant run on topinsns. dunno why
+	if (insn_->op() != m_and)
 		return false;
-	if (insn_->opcode != m_and) {
+
+	auto [bnotop, numop] = insn_->arrange_by_insn(m_bnot);
+	if (!bnotop || !numop || !numop->is_equal_to(1ULL, false))
 		return false;
-	}
 
-	mop_t* insn_op = insn_->get_eitherlr(mop_d);
-
-	mop_t* constop = insn_->get_eitherlr(mop_n);
-
-	if (!insn_op || !constop) {
+	auto [bninsn, bnoperand] = bnotop->descend_to_unary_insn(m_bnot);
+	if (!bninsn)
 		return false;
+	mop_t dstguy{};
+	bool hasdst = false;
+	if (insn_->d.t != mop_z) {
+		dstguy = insn_->d;
+		hasdst = true;
 	}
+	mop_t x = *bnoperand;
+	mop_t y = *numop;
+	y.size = x.size;
+	unsigned xtsize = insn_->d.size;
+	setup_ztest_bitand(insn_, true, &x, &y, xtsize);
 
-
-
-	if (constop->nnn->value != 1ULL) {
-		return false;
+	if (hasdst) {
+		insn_->d = dstguy;
 	}
-
-
-	minsn_t* inner = insn_op->d;
-	if (inner->opcode != m_bnot) {
-		return false;
-	}
-
-
-
-	mop_t* bnot_parm = &inner->l;
-
-
-	//minsn_t* newop = new minsn_t(BADADDR);
-
-	insn_->opcode = m_setz;
-
-	insn_->d.size = 1;
-	constop->nnn->value = 0ULL;
-
-	inner->opcode = m_and;
-
-	inner->r.t = mop_n;
-
-	inner->r.size = inner->l.size;
-
-	inner->r.nnn = new mnumber_t(1ULL);
-
-	if (hexext::get_parent_mop_size() != 1) {
-		minsn_t* copyinsn = new minsn_t(BADADDR);
-		*copyinsn = *insn_;
-
-		insn_->l.erase();
-		insn_->r.erase();
-		insn_->d.erase();
-
-		insn_->opcode = m_xdu;
-
-		insn_->d.size = hexext::get_parent_mop_size();
-
-		insn_->l.t = mop_d;
-		insn_->l.size = 1;
-		insn_->l.d = copyinsn;
-
-
-	}
-
-	
-
 	return true;
+
 
 	
 }

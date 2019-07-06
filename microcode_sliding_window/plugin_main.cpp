@@ -9,23 +9,11 @@
 #include <array>
 #include <list>
 #include <string>
-
-
-#include "allins.hpp"
-#include "hexext_core.hpp"
 #include "cs_core.hpp"
 #define HEXEXTV2
-
-
-
-using namespace hexext;
-
-
 #ifdef BACKPORT_MICROCODE
 #include "micro_on_70.hpp"
 #endif
-
-#include "hexext_ida.hpp"
 
 #include "microgen_additions/microgen_core.hpp"
 #include "combine_rules/combine_core.hpp"
@@ -72,13 +60,25 @@ int idaapi init(void)
 
 	if (!hexdsp)
 		return PLUGIN_SKIP;
+
+	auto hexver = get_hexrays_version();
+
+	cs_assert(hexver);
+
+	if (!strcmp("7.0.0.170914", hexver)) {
+
+		hexext::install_glbopt_cb(dump_microcode_);
+		msg("Hexext is loaded! Use Ctrl-2 to toggle optimizations on and off!\n");
+		
+		
+		return PLUGIN_KEEP;
+	}
+	else {
+		msg("Hexext only supports decompilers with version 7.0.0.170914 right now, this version is %s. Unloading.\n", hexver);
+		return PLUGIN_SKIP;
+	}
 	
-//	hexext::install_glbopt_cb(dump_microcode_);
 
-	
-
-
-	return PLUGIN_KEEP;
 }
 
 

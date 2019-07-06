@@ -17,3 +17,11 @@ ROLE_SEP
 #include "or128.hpp"
 ROLE_SEP
 #include "loada128.hpp"
+ROLE_SEP
+#include "vmulf32.hpp"
+ROLE_SEP
+#include "vmulf64.hpp"
+ROLE_SEP
+#include "vaddf32.hpp"
+ROLE_SEP
+#include "vaddf64.hpp"

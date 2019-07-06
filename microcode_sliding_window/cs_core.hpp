@@ -75,6 +75,7 @@ namespace cs::_cs_assert_impl {
 #else
 #define cs_assert(...)		\
 	do {\
+		static constexpr const char* __funcy = __FUNCTION__;\
 		class _arg_passer {\
 		public:\
 			static constexpr const char* __msg() {\
@@ -83,7 +84,7 @@ namespace cs::_cs_assert_impl {
 			static constexpr const char* __file() {\
 				return __FILE__;\
 			}\
-static constexpr const char* fn(){return __FUNCTION__;}\
+static constexpr const char* fn(){return __funcy;}\
 		};\
 \
 		using __failure_handler = cs::_cs_assert_impl::_cs_assert_fail<_arg_passer>;\

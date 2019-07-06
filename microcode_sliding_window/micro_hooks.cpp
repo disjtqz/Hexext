@@ -22,6 +22,8 @@ static bool dispatch_microcode_generated(mbl_array_t* mba);
 static std::list<asmrewrite_cb_t> g_asm_rewrite_cbs;
 #include "internal/micro_filter_api.hpp"
 
+
+#include "mixins/set_codegen_small.mix"
 static std::list < glbopt_cb_t> g_glbopt_cbs;
 static std::list<combine_cb_t> g_combine_cbs;
 static std::list<microcode_generated_cb_t> g_microcode_generated_cbs;
@@ -43,6 +45,7 @@ static minsn_t* g_current_topinsn = nullptr;
 static mop_t* g_current_mop = nullptr;
 
 static int dispatch_combinsn(mblock_t* block, minsn_t* insn);
+CS_COLD_CODE
 void hexext::install_microcode_filter_ex(hexext_micro_filter_t* mcu, bool install) {
 
 	if (install) {
@@ -106,7 +109,8 @@ static void run_combinsn_fixups(mblock_t* block, minsn_t* insn) {
 		
 
 		if (mop->t == mop_d && mop->size != mop->d->d.size) {
-			mop->d->d.size = mop->size;
+			cs_assert(false);
+			//mop->d->d.size = mop->size;
 			}
 
 		if (mop->t == mop_d && mop->d->op() == m_nop) {
@@ -217,7 +221,6 @@ static int dispatch_combinsn(mblock_t* block, minsn_t* insn) {
 
 
 static bool dispatch_microcode_generated(mbl_array_t* mba) {
-	msg("Dispatching microcode_generated\n");
 
 	/*
 		this doesnt always get called once microcode is fully generated. i havent looked too much into why because nothing uses this yet, other than dump_mba in testing
@@ -329,7 +332,7 @@ static void install_cb() {
 static void remove_cb() {
 	remove_hexrays_callback(&hexcb, nullptr);
 }
-
+CS_COLD_CODE
 void hexext_internal::init_hexext() {
 	init_hexrays_plugin();
 	if (!hexdsp) {
@@ -342,7 +345,7 @@ void hexext_internal::init_hexext() {
 		install_microcode_filter(&g_filter_api, true);
 	}
 }
-
+CS_COLD_CODE
 void hexext_internal::deinit_hexext() {
 	// clean up
 	if (!hexdsp)
@@ -354,18 +357,19 @@ void hexext_internal::deinit_hexext() {
 
 }
 
-
+CS_COLD_CODE
 void hexext::install_glbopt_cb(glbopt_cb_t cb)  {
 	g_glbopt_cbs.push_back( cb);
 }
-
+CS_COLD_CODE
 void hexext::install_combine_cb(combine_cb_t cb) {
 	g_combine_cbs.push_back(cb);
 }
+CS_COLD_CODE
 void hexext::remove_combine_cb(combine_cb_t cb) {
 	g_combine_cbs.remove(cb);
 }
-
+CS_COLD_CODE
 void hexext::install_combine_cb(combine_cb_t cb, bool enabled) {
 	if (enabled) {
 		install_combine_cb(cb);
@@ -373,6 +377,7 @@ void hexext::install_combine_cb(combine_cb_t cb, bool enabled) {
 	else
 		remove_combine_cb(cb);
 }
+CS_COLD_CODE
 void hexext::install_locopt_cb(locopt_cb_t cb, bool enabled) {
 	if (enabled) {
 		g_locopt_cbs.push_back(cb);
@@ -381,6 +386,7 @@ void hexext::install_locopt_cb(locopt_cb_t cb, bool enabled) {
 		g_locopt_cbs.remove(cb);
 	}
 }
+CS_COLD_CODE
 void hexext::install_preopt_cb(preopt_cb_t cb, bool enabled) {
 	if (enabled) {
 		g_preopt_cbs.push_back(cb);
@@ -389,18 +395,19 @@ void hexext::install_preopt_cb(preopt_cb_t cb, bool enabled) {
 		g_preopt_cbs.remove(cb);
 	}
 }
-
+CS_COLD_CODE
 void hexext::install_microcode_generated_cb(microcode_generated_cb_t cb) {
 	g_microcode_generated_cbs.push_back(cb);
 }
-
+CS_COLD_CODE
 void hexext::install_asm_rewriter(asmrewrite_cb_t cb) {
 	g_asm_rewrite_cbs.push_back(cb);
 }
+CS_COLD_CODE
 void hexext::remove_asm_rewriter(asmrewrite_cb_t cb) {
 	g_asm_rewrite_cbs.remove(cb);
 }
-
+CS_COLD_CODE
 void hexext::install_asm_rewriter(asmrewrite_cb_t cb, bool enabled) {
 	if (enabled) {
 		install_asm_rewriter(cb);
@@ -417,3 +424,4 @@ int hexext::microgen_decode_insn(insn_t* insn, ea_t ea) {
 ea_t hexext::microgen_decode_prev_insn(insn_t* insn, ea_t ea) {
 	return g_filter_api._microgen_decode_prev_insn(insn, ea);
 }
+#include "mixins/revert_codegen.mix"
