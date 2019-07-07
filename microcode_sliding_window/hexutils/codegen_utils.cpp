@@ -150,3 +150,20 @@ void setup_ztest_bitand(minsn_t* into, bool z, mop_t* l, mop_t* r, unsigned size
 	setup_subinsn_setcc_of_size(into, z ? m_setz : m_setnz, size, &andop, &ztest);
 
 }
+
+void insert_mov2_before(ea_t ea, mblock_t* blk, minsn_t* before, mop_t* from, mop_t* to) {
+	
+	if (before) {
+		before = before->prev;
+
+	}
+
+	minsn_t* moveeboi = new minsn_t(ea);
+	moveeboi->opcode = m_mov;
+
+	moveeboi->l = *from;
+	moveeboi->d = *to;
+
+	blk->insert_into_block(moveeboi, before);
+
+}

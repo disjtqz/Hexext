@@ -17,7 +17,7 @@
 #include "combine_or_shift_seq.hpp"
 #include "simd_bitops_simplify.hpp"
 #include "rewrite_float_bitops.hpp"
-
+#include "cleanup_late_flag_ops.hpp"
 class negated_sets_t : public mcombiner_rule_t {
 public:
 	virtual bool run_combine(mcombine_t* state);
@@ -417,7 +417,8 @@ static mcombiner_rule_t* g_allrules[] = {
 	& detect_xdu_in_xor128,
 	& detect_bitwise_negate_floatop,
 	& locate_abs_value_floatpath,
-	& combine_ltzero_result_shifted_to_highbit
+	& combine_ltzero_result_shifted_to_highbit,
+	& sift_down_flagcomps
 };
 
 void toggle_common_combination_rules(bool enabled) {

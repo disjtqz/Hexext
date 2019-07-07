@@ -290,7 +290,7 @@ static inline void add_mop_to_mlist_inline(mop_t* CS_RESTRICT mop, mlist_t* CS_R
 void add_mop_to_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
 	add_mop_to_mlist_inline(mop, mlist, lvars);
 }
-static inline bool test_mop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
+static inline bool test_mop_in_mlist_local(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
 	auto t = mop->t;
 	if (!instruction_set_is_member(lut_is_mlist_addable, t))
 		return false;
@@ -332,12 +332,36 @@ static inline bool test_mop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRIC
 	}
 	return false;
 }
+
+bool test_mop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
+	return test_mop_in_mlist_local(mop, mlist, lvars);
+}
+
 struct gen_use_traversal_traits {
 	static constexpr unsigned AUXSTACK_SIZE = 128;
 	static constexpr bool maintain_context_ptrs = false;
 	static constexpr bool may_term_flow = false;
 };
 
+struct test_submop_trav {
+	static constexpr unsigned AUXSTACK_SIZE = 64;
+	static constexpr bool maintain_context_ptrs = false;
+	static constexpr bool may_term_flow = true;
+};
+bool test_any_submop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
+	
+	bool res = false;
+	traverse_micro < test_submop_trav>(mop, [&res, mlist, lvars](mop_t * m) {
+		if (test_mop_in_mlist(m, mlist, lvars)) {
+			res = true;
+			return true;
+			}
+		return false;
+		});
+
+	return res;
+
+}
 void generate_use_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT mlist) {
 
 	lvars_t* CS_RESTRICT lvars = &mba->vars;
@@ -379,7 +403,7 @@ bool gather_user_subinstructions(lvars_t* lvars,minsn_t* insn, mlist_t* CS_RESTR
 
 		minsn_t*  d = mop->d;
 
-		if (test_mop_in_mlist(&d->l, list, lvars) || test_mop_in_mlist(&d->r, list, lvars) ) {
+		if (test_mop_in_mlist_local(&d->l, list, lvars) || test_mop_in_mlist_local(&d->r, list, lvars) ) {
 	do_the_deed:
 			did_exceed_size |= !(into->push_back(d));
 			return;
@@ -389,7 +413,7 @@ bool gather_user_subinstructions(lvars_t* lvars,minsn_t* insn, mlist_t* CS_RESTR
 		if (d->d.t == mop_f) {
 
 			for (auto&& arg : d->d.f->args) {
-				if (test_mop_in_mlist(&arg, list, lvars)) {
+				if (test_mop_in_mlist_local(&arg, list, lvars)) {
 					goto do_the_deed;
 				}
 			}
@@ -444,6 +468,7 @@ minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redef
 	minsn_t* curr = insn->next;
 	mlist_t l{};
 	mlist_t def{};
+	if(redefed)
 	*redefed = false;
 	for (; curr; curr = curr->next) {
 
@@ -457,6 +482,7 @@ minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redef
 
 		if (def.mem.has_common_(&mlist->mem) || def.reg.has_common(mlist->reg))
 		{
+			if (redefed)
 			*redefed = true;
 			return nullptr;
 		}
@@ -504,9 +530,10 @@ minsn_t* find_intervening_use(mblock_t* blk, minsn_t* insn1, minsn_t* insn2, mli
 	return nullptr;
 }
 
-
-static bool find_definition_size_impl(mblock_t* block, minsn_t* insn, unsigned* size_out, mlist_t* lst, std::set<int>* CS_RESTRICT visited) {
-	visited->insert(block->serial);
+template<typename bitset_type>
+CS_NOINLINE
+static bool find_definition_size_impl(mblock_t* block, minsn_t* insn, unsigned* size_out, mlist_t* lst, bitset_type* CS_RESTRICT visited) {
+	visited->add(block->serial);
 
 
 
@@ -519,7 +546,7 @@ static bool find_definition_size_impl(mblock_t* block, minsn_t* insn, unsigned* 
 			return false;
 		for (auto&& predidx : block->predset) {
 
-			if (visited->count(predidx) == 1) {
+			if (visited->has(predidx) ) {
 				return false;
 			}
 			else {
@@ -564,14 +591,28 @@ static bool find_definition_size_impl(mblock_t* block, minsn_t* insn, unsigned* 
 		return true;
 	}
 }
-bool find_definition_size(mblock_t* block, minsn_t* insn, unsigned* size_out, mop_t* mreg) {
+bool find_definition_size(bitset_t* visited_pool, mblock_t* block, minsn_t* insn, unsigned* size_out, mop_t* mreg) {
 
 	mlist_t lst{};
 	add_mop_to_mlist_inline(mreg, &lst, &block->mba->vars);
 
-	std::set<int> visited{};
+	//std::set<int> visited{};
 
-	return find_definition_size_impl(block, insn, size_out, &lst, &visited);
+	auto qty = block->mba->qty;
+	if (qty < 64) {
+		bitset64_t tiny{};
+
+		return find_definition_size_impl(block, insn, size_out, &lst, &tiny);
+	}
+	else if (qty < 128) {
+		bitset128_t tiny{};
+
+		return find_definition_size_impl(block, insn, size_out, &lst, &tiny);
+	}
+	else {
+		visited_pool->clear();
+		return find_definition_size_impl(block, insn, size_out, &lst, visited_pool);
+	}
 }
 
 
@@ -1007,7 +1048,7 @@ struct usage_path_gatherer_tmpl_t {
 			fixed size vector, intended to be reused
 			acts as a set of visited basic blocks
 		*/
-		fixed_size_vecptr_t<T> visited_pool,
+		T visited_pool,
 		mblock_t* blk,
 		mlist_t* list,
 		bool prior,
@@ -1019,14 +1060,11 @@ struct usage_path_gatherer_tmpl_t {
 
 		for (auto&& succ : prior ? blk->predset : blk->succset ) {
 
-			if (std::binary_search(visited_pool->begin(), visited_pool->end(), (T)succ)) {
+			if (visited_pool->has(succ)) {
 				continue;
 			}
-			if (!visited_pool->push_back((T)succ)) {
-				return false;//exceeded visitation pool
-			}
-
-			std::make_heap(visited_pool->begin(), visited_pool->end());
+			visited_pool->add(succ);
+			//std::make_heap(visited_pool->begin(), visited_pool->end());
 			//gather uses in path only returns false if we exceeded the pool
 			auto nblk = blk->mba->natural[succ];
 
@@ -1041,20 +1079,17 @@ struct usage_path_gatherer_tmpl_t {
 	}
 };
 //used if bb indexes are less than 256
-using usage_gatherer_bblt256_t = usage_path_gatherer_tmpl_t<unsigned char>;
+using usage_gatherer_bblt64_t = usage_path_gatherer_tmpl_t<bitset64_t*>;
 
 //used if they're less than 65536 (basically all of them should be)
-using usage_gatherer_bblt65536_t = usage_path_gatherer_tmpl_t<unsigned short>;
-//fuck, wow, this is a big ass function but we'll support it i guess
-using usage_gatherer_default_t = usage_path_gatherer_tmpl_t<unsigned int>;
+using usage_gatherer_bblt128_t = usage_path_gatherer_tmpl_t<bitset128_t*>;
+//big ass function mayne
+using usage_gatherer_default_t = usage_path_gatherer_tmpl_t<bitset_t*>;
 
 
 void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
-	/* 
-		fixed size vector, intended to be reused
-		acts as a set of visited basic blocks
-	*/
-	fixed_size_vecptr_t<unsigned> visited_pool,
+
+	bitset_t* visited_pool,
 	minsn_t* start,
 	mblock_t* blk,
 	mlist_t* list, bool prior) {
@@ -1073,19 +1108,24 @@ void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 
 	//gather_uses_in_path(uses, visited_pool, blk, list, start);
 
-	visited_pool->reset();
+	//visited_pool->reset();
 
 	
 
 	mbl_array_t* mba = blk->mba;
 
-	if (mba->qty < 256) {
-		usage_gatherer_bblt256_t::gather_uses_in_path(uses, visited_pool->cast_down<uint8_t>(), blk, list, prior,start);
+	if (mba->qty < 64) {
+		bitset64_t visited{};
+
+		usage_gatherer_bblt64_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
 	}
-	else if (mba->qty < 65536) {
-		usage_gatherer_bblt65536_t::gather_uses_in_path(uses, visited_pool->cast_down<uint16_t>(), blk, list, prior,start);
+	else if (mba->qty < 128) {
+		bitset128_t visited{};
+
+		usage_gatherer_bblt128_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
 	}
 	else {
+		visited_pool->clear();
 		usage_gatherer_default_t::gather_uses_in_path(uses, visited_pool, blk, list, prior, start);
 	}
 
@@ -1128,3 +1168,80 @@ bool gather_equal_valnums_in_block(mblock_t* blk, mop_t* mop, fixed_size_vecptr_
 	return did_exceed;
 }
 
+
+struct has_any_ldx_traits {
+	static constexpr unsigned AUXSTACK_SIZE = 48;
+	static constexpr bool maintain_context_ptrs = false;
+	static constexpr bool may_term_flow = false;
+};
+bool has_any_ldx(minsn_t* CS_RESTRICT insn) {
+	bool fug = false;
+	traverse_minsn< has_any_ldx_traits>(insn, [&fug](mop_t * mop) {
+		if (mop->t != mop_d)
+			return false;
+
+		if (mop->d->op() == m_ldx) {
+			fug = true;
+			return true;
+		}
+		return false;
+
+	});
+	return fug;
+}
+
+void replace_cc_flag_mops_with_other_mop(minsn_t* insn, mreg_t ccmr, mop_t* mop) {
+
+	traverse_minsn<gen_use_traversal_traits>(insn, [ccmr, mop](mop_t * repr) {
+		if (repr->t == mop_r && repr->r == ccmr) {
+			*repr = *mop;
+			}
+		});
+
+}
+
+mreg_t allocate_tempreg_unused_in_block_range(mblock_t* blk, unsigned size) {
+	mlist_t uses{};
+
+	generate_uses_between(blk, nullptr, nullptr, &uses);
+
+	rlist_t temps = rlist_tempregs;
+
+	temps.sub(uses.reg);
+
+
+	for (mreg_t i = mr_t0; i < rlist_tempregs.high; i += size) {
+		if (!temps.has_any(i, size)) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+mop_t* resolve_lvalue(mop_t* input) {
+	mop_t* current = input;
+
+	do {
+		mop_t* lowoper = nullptr;
+		if (try_extract_low(current, &lowoper)) {
+			current = lowoper;
+			continue;
+		}
+
+		xdu_extraction_t xduext{};
+
+		if (try_extract_xdu(current, &xduext)) {
+			current = xduext.xdu_operand();
+		}
+		else {
+			break;
+		}
+
+	} while (true);
+
+	if (current && current->is_lvalue()) {
+		return current;
+	}
+	return nullptr;
+}

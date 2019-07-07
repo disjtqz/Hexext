@@ -542,6 +542,7 @@
     <ClCompile Include="combine_rules\bnot_and_low.cpp" />
     <ClCompile Include="combine_rules\bytewise_shift.cpp" />
     <ClCompile Include="combine_rules\byte_shifts_and_adds_to_ors.cpp" />
+    <ClCompile Include="combine_rules\cleanup_late_flag_ops.cpp" />
     <ClCompile Include="combine_rules\combine_cndop_and_xor_1.cpp" />
     <ClCompile Include="combine_rules\combine_core.cpp" />
     <ClCompile Include="combine_rules\combine_or_shift_seq.cpp" />
@@ -597,6 +598,7 @@
     <ClInclude Include="combine_rules\bnot_and_low.hpp" />
     <ClInclude Include="combine_rules\bytewise_shift.hpp" />
     <ClInclude Include="combine_rules\byte_shifts_and_adds_to_ors.hpp" />
+    <ClInclude Include="combine_rules\cleanup_late_flag_ops.hpp" />
     <ClInclude Include="combine_rules\combine_cndop_and_xor_1.hpp" />
     <ClInclude Include="combine_rules\combine_core.hpp" />
     <ClInclude Include="combine_rules\combine_or_shift_seq.hpp" />
@@ -638,6 +640,7 @@
     <ClInclude Include="hexutils\codegen_utils.hpp" />
     <ClInclude Include="hexutils\hexutils.hpp" />
     <ClInclude Include="hexutils\micro_executor_template.hpp" />
+    <ClInclude Include="hexutils\smaller_bitsets.hpp" />
     <ClInclude Include="hexutils\traverse_micro.hpp" />
     <ClInclude Include="internal\idaregs_x86_64.hpp" />
     <ClInclude Include="internal\micro_filter_api.hpp" />

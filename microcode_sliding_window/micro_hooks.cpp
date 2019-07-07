@@ -15,6 +15,23 @@
 #include "hexutils/hexutils.hpp"
 #include "ctree/ctree.hpp"
 
+static struct {
+	unsigned did_run_preopt : 1;
+	unsigned did_run_locopt : 1;
+	unsigned did_run_glbopt : 1;
+
+}g_microgen_state_flags;
+
+
+bool hexext::ran_glbopt() {
+	return g_microgen_state_flags.did_run_glbopt;
+}
+bool hexext::ran_locopt() {
+	return g_microgen_state_flags.did_run_locopt;
+}
+bool hexext::ran_preopt() {
+	return g_microgen_state_flags.did_run_preopt;
+}
 /*
 	micro_filter_api needs these defs
 */
@@ -58,7 +75,7 @@ void hexext::install_microcode_filter_ex(hexext_micro_filter_t* mcu, bool instal
 }
 
 static int g_did_glbopt_loop = 0;
-
+static bitset_t g_bbidx_pool{};
 static int dispatch_glbopt(mbl_array_t* mba) {
 	bool did_modify = false;
 	for (auto&& cb : g_glbopt_cbs) {
@@ -160,6 +177,10 @@ static int dispatch_combinsn_recursive(mblock_t* block, mop_t* insn) {
 
 mcombine_t g_mcombine_state{};
 static int dispatch_combinsn(mblock_t* block, minsn_t* insn) {
+
+	if (g_bbidx_pool.high < block->mba->qty) {
+		g_bbidx_pool.resize(block->mba->qty);
+	}
 	/*
 		at the time when i was developing this and wrote most of the rules I was accidentally using a version of hexrays i patched a while back 
 		to remove calls to mblock verify, minsn verify to speed up decompilation
@@ -186,11 +207,13 @@ static int dispatch_combinsn(mblock_t* block, minsn_t* insn) {
 
 	g_mcombine_state.m_block = block;
 	g_mcombine_state.m_insn = insn;
-	g_mcombine_state.m_bbidx_pool = 
+	g_mcombine_state.m_bbidx_pool = &g_bbidx_pool;
+
+	/*g_mcombine_state.m_bbidx_pool = 
 		fixed_size_vecparm_t<unsigned>::emplace_at(
 		alloca(fixed_size_vecparm_t<unsigned>::required_allocation_size(block->mba->qty)), block->mba->qty);
 
-
+		*/
 
 	for (auto&& cb : g_combine_cbs) {
 		if (cb->combine(&g_mcombine_state)) {
@@ -260,11 +283,20 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 	msg("%s\n", stringify_hxe(event));
 #endif
 	if (event == hxe_glbopt) {
-
+		g_microgen_state_flags.did_run_glbopt = 1;
 		mbl_array_t* mba = va_arg(va, mbl_array_t*);
 
 		
 		return dispatch_glbopt(mba);
+	}
+	else if (event == hxe_prolog) {
+		/*
+			reset codegen flags
+		*/
+
+		g_microgen_state_flags.did_run_glbopt = 0;
+		g_microgen_state_flags.did_run_locopt = 0;
+		g_microgen_state_flags.did_run_preopt = 0;
 	}
 	else if (event == hxe_combine) {
 		mblock_t* block = va_arg(va, mblock_t*);
@@ -274,6 +306,7 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 	}
 
 	else if (event == hxe_locopt) {
+		g_microgen_state_flags.did_run_locopt = 1;
 		mbl_array_t* mba = va_arg(va, mbl_array_t*);
 		for (auto&& cb : g_locopt_cbs) {
 			cb(mba);
@@ -281,6 +314,7 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 		return 0;
 	}
 	else if (event == hxe_preoptimized) {
+		g_microgen_state_flags.did_run_preopt = 1;
 		g_did_glbopt_loop = 0;
 
 		

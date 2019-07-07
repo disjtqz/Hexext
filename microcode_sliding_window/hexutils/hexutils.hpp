@@ -2,7 +2,7 @@
 #include "../cs_core.hpp"
 
 #include "traverse_micro.hpp"
-
+#include "smaller_bitsets.hpp"
 
 struct mulp2_const_t {
 	mop_t* m_numop;
@@ -168,6 +168,17 @@ static inline bool try_extract_high(mop_t* mop, mop_t** highoperand) {
 
 	return true;
 }
+static inline bool try_extract_low(mop_t* mop, mop_t** highoperand) {
+	if (mop->t != mop_d) {
+		return false;
+	}
+	if (mop->d->opcode != m_low)
+		return false;
+
+	*highoperand = &mop->d->l;
+
+	return true;
+}
 
 
 struct mul_by_constant_extraction_t {
@@ -237,6 +248,10 @@ struct udiv_by_constant_extraction_t {
 
 bool try_extract_udiv_by_constant(minsn_t* CS_RESTRICT insn, udiv_by_constant_extraction_t* CS_RESTRICT out);
 void add_mop_to_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars);
+//only operates on lvalue-esque mops.
+bool test_mop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars);
+//recurses through submops
+bool test_any_submop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars);
 
 void generate_use_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT mlist);
 void generate_def_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT mlist);
@@ -246,7 +261,7 @@ minsn_t* find_definition_backwards(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRI
 minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn, mlist_t* CS_RESTRICT mlist);
 minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed);
 minsn_t* find_prev_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* defed);
-bool find_definition_size(mblock_t* block, minsn_t* insn, unsigned* size_out, mop_t* mreg);
+bool find_definition_size(bitset_t* visited_pool,  mblock_t* block, minsn_t* insn, unsigned* size_out, mop_t* mreg);
 mop_t* locate_first_mreg_use_in_insn(minsn_t* insn, mreg_t mreg, unsigned mreg_size);
 
 
@@ -334,7 +349,7 @@ void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 		fixed size vector, intended to be reused
 		acts as a set of visited basic blocks
 	*/
-	fixed_size_vecptr_t<unsigned> visited_pool,
+	bitset_t* visited_pool,
 	minsn_t* start,
 	mblock_t* blk,
 	mlist_t* list, bool prior);
@@ -352,6 +367,28 @@ static inline bool mop_seems_floaty_p(mop_t* mop) {
 	return (mop->oprops & OPROP_FLOAT) || (mop->t == mop_d && mop->d->is_fpinsn());
 }
 
-#include "codegen_utils.hpp"
+static inline bool mlist_has_any_cc(mlist_t* ml) {
+	return ml->reg.has_any(mr_cf, mr_pf + 1);
+}
 
+static inline void generate_defs_between(mblock_t* blk, minsn_t* after_this, minsn_t* stop_at_this, mlist_t* l) {
+	if (!after_this) after_this = blk->head;
+	for (minsn_t* p = after_this->next; p != stop_at_this; p = p->next) {
+		generate_def_for_insn(blk->mba, p, l);
+	}
+}
+static inline void generate_uses_between(mblock_t* blk, minsn_t* after_this, minsn_t* stop_at_this, mlist_t* l) {
+	if (!after_this)after_this = blk->head;
+	for (minsn_t* p = after_this->next; p != stop_at_this; p = p->next) {
+		generate_use_for_insn(blk->mba, p, l);
+	}
+}
+
+void replace_cc_flag_mops_with_other_mop(minsn_t* insn, mreg_t ccmr, mop_t* mop);
+mreg_t allocate_tempreg_unused_in_block_range(mblock_t* blk, unsigned size);
+/*
+	traverse xdu and low until we get out lvalue
+*/
+mop_t* resolve_lvalue(mop_t* input);
+#include "codegen_utils.hpp"
 #include "micro_executor_template.hpp"

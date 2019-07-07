@@ -222,6 +222,9 @@
     <ClCompile Include="hexutils\codegen_utils.cpp">
       <Filter>Source Files\hexutils</Filter>
     </ClCompile>
+    <ClCompile Include="combine_rules\cleanup_late_flag_ops.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="micro_on_70.hpp">
@@ -450,6 +453,12 @@
       <Filter>Header Files\combine_rules</Filter>
     </ClInclude>
     <ClInclude Include="hexutils\codegen_utils.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\cleanup_late_flag_ops.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\smaller_bitsets.hpp">
       <Filter>Header Files\hexutils</Filter>
     </ClInclude>
   </ItemGroup>

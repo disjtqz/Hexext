@@ -47,3 +47,7 @@ unsigned mreg_sizeof(mreg_t mr);
 bool is_kreg(mreg_t mr);
 
 bool is_simdreg(mreg_t mr);
+
+extern mreg_t mr_t0;
+extern mreg_t mr_t1;
+extern mreg_t mr_t2;

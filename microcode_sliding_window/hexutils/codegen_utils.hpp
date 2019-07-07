@@ -19,3 +19,5 @@ void setup_bitand(minsn_t* andtest, mop_t* l, mop_t* r);
 */
 
 void setup_ztest_bitand(minsn_t* into, bool z,  mop_t* l, mop_t* r, unsigned size = 1);
+
+void insert_mov2_before(ea_t ea,mblock_t* blk, minsn_t* before, mop_t* from, mop_t* to);

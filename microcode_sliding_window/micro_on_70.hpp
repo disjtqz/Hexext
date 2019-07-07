@@ -193,6 +193,8 @@ public:
 	hexapi bitset_t(const bitset_t& m) : bitset_t(&m) {}          // copy constructor
 	hexapi bitset_t(const bitset_t* m);
 
+
+
 	~bitset_t(void)
 	{
 		qfree(bitmap);
@@ -257,6 +259,12 @@ public:
 	int compare_(const bitset_t* rhs) const;
 	void copy(const bitset_t* other);
 	
+	inline void clear() {
+		unsigned isize = (high / 32) + ((high % 32) != 0);
+
+		memset(bitmap, 0, isize * sizeof(bitmap[0]));
+	}
+
 	bitset_t& operator=(const bitset_t& m) { // assignment operator
 		copy(&m);
 		return *this;
@@ -283,6 +291,9 @@ public:
 private:
 	int hexapi goup(int reg) const;
 };
+
+
+
 DECLARE_TYPE_AS_MOVABLE(bitset_t);
 using rlist_t = bitset_t;
 
@@ -1783,8 +1794,8 @@ class mcombine_t {
 public:
 	minsn_t* m_insn;
 	mblock_t* m_block;
-	fixed_size_vecptr_t<unsigned> m_bbidx_pool;
-
+	//fixed_size_vecptr_t<unsigned> m_bbidx_pool;
+	bitset_t* m_bbidx_pool;
 
 	minsn_t* insn() {
 		return m_insn;
@@ -1878,6 +1889,10 @@ namespace hexext {
 	ea_t microgen_decode_prev_insn(insn_t* insn, ea_t ea);
 
 	int microgen_decode_insn(insn_t* insn, ea_t ea);
+
+	bool ran_preopt();
+	bool ran_locopt();
+	bool ran_glbopt();
 }
 
 #include <string>

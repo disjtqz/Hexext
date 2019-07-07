@@ -591,6 +591,10 @@ public:
 		return &m_storage[0];
 	}
 
+	constexpr T& back() {
+		return m_storage[size() - 1];
+	}
+
 	constexpr T* end() {
 		return &m_storage[m_curr_size];
 	}

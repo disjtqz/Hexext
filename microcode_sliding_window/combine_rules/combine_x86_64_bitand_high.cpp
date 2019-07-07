@@ -78,32 +78,7 @@ static bool combine_x86_64_bitand_high(mblock_t* block, minsn_t* insn) {
 }
 
 static bool combine_x86_64_bitor_high(mblock_t* block, minsn_t* insn) {
-	if (insn->opcode != m_or)
-		return false;
 
-	
-	mop_t* nonconst;
-
-	mop_t* consty = insn->get_eitherlr(mop_n, &nonconst);
-
-	if (!consty || consty->size != 1 || nonconst->t != mop_r || !mreg_has_highbyte_x86(nonconst->r-1) || !insn->d.lvalue_equal_ignore_size(nonconst))
-		return false;
-
-
-	unsigned defsize;
-
-	if (!find_definition_size(block, insn, &defsize, nonconst) || defsize == 1)
-		return false;
-
-
-	nonconst->r -= 1;
-	consty->nnn->value <<= 8;
-	consty->nnn->org_value <<= 8;
-	consty->size = defsize;
-	nonconst->size = defsize;
-	insn->d.r -= 1;
-	insn->d.size = defsize;
-	return true;
 }
 
 /*
@@ -120,7 +95,35 @@ const char* combine_x86_band_high_t::name() const {
 }
 
 bool combine_x86_bitor_high_t::run_combine(mcombine_t* state) {
-	return combine_x86_64_bitor_high(state->block(), state->insn());
+	auto block = state->block();
+	auto insn = state->insn();
+	if (insn->opcode != m_or)
+		return false;
+
+
+	mop_t * nonconst;
+
+	mop_t * consty = insn->get_eitherlr(mop_n, &nonconst);
+
+	if (!consty || consty->size != 1 || nonconst->t != mop_r || !mreg_has_highbyte_x86(nonconst->r - 1) || !insn->d.lvalue_equal_ignore_size(nonconst))
+		return false;
+
+
+	unsigned defsize;
+
+	if (!find_definition_size(state->bbidx_pool(), block, insn, &defsize, nonconst) || defsize == 1)
+		return false;
+
+
+	nonconst->r -= 1;
+	consty->nnn->value <<= 8;
+	consty->nnn->org_value <<= 8;
+	consty->size = defsize;
+	nonconst->size = defsize;
+	insn->d.r -= 1;
+	insn->d.size = defsize;
+	return true;
+	//return combine_x86_64_bitor_high(state->block(), state->insn());
 }
 
 const char* combine_x86_bitor_high_t::name() const {

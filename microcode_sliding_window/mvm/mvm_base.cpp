@@ -15,7 +15,9 @@ rlist_t rlist_tempregs{};
 
 mreg_t mr_eax = -1, mr_ebx = -1,
 mr_ecx = -1, mr_edx = -1;
-
+mreg_t mr_t0 = -1,
+mr_t1 = -1,
+mr_t2 = -1;
 std::vector<mreg_info_t> g_mreg_info{};
 unsigned g_max_mreg = 0;
 static bool g_did_init_mregs = false;
@@ -100,16 +102,24 @@ static int compare_mreg_info(const void* _x, const void* _y) {
 	else
 		return 1;
 }
+CS_NOINLINE
+static void sort_mregs() {
+	std::sort(&g_mreg_info[0], &g_mreg_info[g_max_mreg], [](const mreg_info_t & x, const mreg_info_t & y) {
 
+		return x.m_micro_reg < y.m_micro_reg;
+
+		});
+}
 static void preinit_mreg_info() {
 	g_max_mreg = 0;
 
 	qstring buffer{};
 	unsigned curr_reg = 0;
-	g_mreg_info.push_back({});
+	//g_mreg_info.push_back({});
 	do {
-		
-		mreg_info_t* curr_entry = &g_mreg_info[g_max_mreg];
+		mreg_info_t _curr_entry{};
+
+		mreg_info_t* curr_entry = &_curr_entry;//&g_mreg_info[g_max_mreg];
 
 		unsigned sz = 0;
 		mreg_t mr = -1;
@@ -123,7 +133,7 @@ static void preinit_mreg_info() {
 			curr_entry->m_orig_reg = curr_reg;
 			curr_entry->m_size = sz;
 			qstrncpy(curr_entry->name, buffer.c_str(), 16);
-			g_mreg_info.push_back({});
+			g_mreg_info.push_back(_curr_entry);
 			g_max_mreg++;
 
 		}
@@ -131,18 +141,14 @@ static void preinit_mreg_info() {
 		curr_reg++;
 	} while (true);
 	//yeah this is garbage
-	g_mreg_info.pop_back();
+	//g_mreg_info.pop_back();
+	sort_mregs();
+	
 
-	/*
-	std::sort(&g_mreg_info[0], &g_mreg_info[g_max_mreg], [](const mreg_info_t & x, const mreg_info_t & y) {
-
-		return x.m_micro_reg < y.m_micro_reg;
-
-		});
-		*/
+		
 
 	//use qsort for smaller binary size
-	qsort(&g_mreg_info[0], g_max_mreg, sizeof(mreg_info_t), compare_mreg_info);
+	//qsort(&g_mreg_info[0], g_max_mreg, sizeof(mreg_info_t), compare_mreg_info);
 	g_did_init_mregs = true;
 
 
@@ -188,7 +194,7 @@ void _mvm_internal::insert_abs_mreg(const char* name, unsigned mreg, unsigned si
 	for (; i < g_max_mreg; ++i)
 		if (g_mreg_info[i].m_micro_reg > mreg)
 			break;
-	
+
 	mreg_info_t v{};
 	v.m_micro_reg = mreg;
 	v.m_orig_reg = 0xFFFF;
@@ -206,13 +212,15 @@ void _mvm_internal::insert_abs_mreg(const char* name, unsigned mreg, unsigned si
 
 mreg_info_t* _mvm_internal::find_mreg_by_name(const char* name) {
 	reg_info_t rinfo{};
-	parse_reg_name(&rinfo, name);
-	
-	auto r = rinfo.reg;
 
-	for (auto&& mreginfo : g_mreg_info) {
-		if (mreginfo.m_orig_reg == r) {
-			return &mreginfo;
+	if (parse_reg_name(&rinfo, name)) {
+
+		auto r = rinfo.reg;
+
+		for (auto&& mreginfo : g_mreg_info) {
+			if (mreginfo.m_orig_reg == r) {
+				return &mreginfo;
+			}
 		}
 	}
 	/*
@@ -260,10 +268,10 @@ void ensure_mvm_init() {
 
 
 #endif
-
+	using namespace _mvm_internal;
 	if (hexext::currarch() == hexext_arch_e::x86) {
 
-		using namespace _mvm_internal;
+	
 
 		mr_eax = find_mreg_by_name("eax")->m_micro_reg;
 		mr_ebx = find_mreg_by_name("ebx")->m_micro_reg;
@@ -273,7 +281,11 @@ void ensure_mvm_init() {
 	}
 
 
+	mr_t0 = find_mreg_by_name("t0")->m_micro_reg;
 
+	mr_t1 = find_mreg_by_name("t1")->m_micro_reg;
+
+	mr_t2 = find_mreg_by_name("t2")->m_micro_reg;
 	//g_mreg_info.shrink_to_fit();
 }
 

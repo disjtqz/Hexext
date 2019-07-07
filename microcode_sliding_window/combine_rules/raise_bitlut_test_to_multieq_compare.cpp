@@ -1,7 +1,7 @@
 #include "combine_rule_defs.hpp"
 #include "raise_bitlut_test_to_multieq_compare.hpp"
 
-static bool raise_bitlut_test_to_multieq_impl(mblock_t* blk, minsn_t* insn, minsn_t** out_res, ea_t ea) {
+static bool raise_bitlut_test_to_multieq_impl(mcombine_t* state, mblock_t* blk, minsn_t* insn, minsn_t** out_res, ea_t ea) {
 	if (insn->opcode != m_and) {
 		return false;
 
@@ -34,12 +34,35 @@ static bool raise_bitlut_test_to_multieq_impl(mblock_t* blk, minsn_t* insn, mins
 	minsn_t* chain_start = new minsn_t(hexext::current_topinsn()->ea);
 
 	minsn_t* current_chain_pos = chain_start;
-
+	
+	mop_t* lval = resolve_lvalue(&innershl->r);
 	unsigned compsize = innershl->r.size;
+
+	mop_t* r;
+	if (lval) {
+		r = lval;
+		if (lval->size == 1) {
+			unsigned defsize = 0;
+			if (find_definition_size(state->bbidx_pool(), blk, hexext::current_topinsn(), &defsize, lval)) {
+				compsize = defsize;
+			}
+		}
+		else {
+			compsize = lval->size;
+		}
+
+	}
+	else {
+		r = &innershl->r;
+	}
+
+	
 	unsigned n = 0;
-	auto make_compare = [innershl, compsize, &n, ea](minsn_t * insn, unsigned against) {
+	auto make_compare = [innershl, compsize, &n, ea, r](minsn_t * insn, unsigned against) {
 		insn->opcode = m_setz;
-		insn->l = innershl->r;
+		insn->l = *r;
+		insn->l.size = compsize;
+
 		insn->r.t = mop_n;
 		insn->r.size = compsize;
 		insn->r.nnn = new mnumber_t(against, ea, n);
@@ -70,8 +93,10 @@ static bool raise_bitlut_test_to_multieq_impl(mblock_t* blk, minsn_t* insn, mins
 
 	return true;
 }
-bool raise_bitlut_test_to_multieq(mblock_t* blk, minsn_t* insn) {
 
+bool raise_bitlut_multieq_t::run_combine(mcombine_t* state) {
+	auto blk = state->block();
+	auto insn = state->insn();
 	if (insn->iprops & IPROP_WILDMATCH)
 		return false;
 	mcode_t op = insn->opcode;
@@ -81,22 +106,14 @@ bool raise_bitlut_test_to_multieq(mblock_t* blk, minsn_t* insn) {
 
 	if (insn->l.t != mop_d || !insn->r.is_equal_to(0ULL, false))
 		return false;
-	minsn_t* chain = nullptr;
+	minsn_t * chain = nullptr;
 
-	
 
-	bool wecool = raise_bitlut_test_to_multieq_impl(blk, insn->l.d, &chain, insn->ea == BADADDR? insn->r.nnn->ea : insn->ea);
+
+	bool wecool = raise_bitlut_test_to_multieq_impl(state, blk, insn->l.d, &chain, insn->ea == BADADDR ? insn->r.nnn->ea : insn->ea);
 	if (!wecool)
 		return false;
-	/*
-	minsn_t* oldins = insn->l.d;
 
-	insn->l.d = chain;
-	insn->l.size = 1;
-
-	insn->r.size = 1;
-
-	delete oldins;*/
 	insn->l.erase();
 
 	insn->l.t = mop_d;
@@ -107,9 +124,6 @@ bool raise_bitlut_test_to_multieq(mblock_t* blk, minsn_t* insn) {
 
 	return true;
 
-}
-bool raise_bitlut_multieq_t::run_combine(mcombine_t* state) {
-	return raise_bitlut_test_to_multieq(state->block(), state->insn());
 }
 
 //jnz (and (low (shl #1.8, rcx.1).8, .-1).4, #1331.4).4, #0.4, 18
