@@ -119,6 +119,7 @@ bool raise_bitlut_multieq_t::run_combine(mcombine_t* state) {
 	insn->l.t = mop_d;
 	insn->l.d = chain;
 	insn->l.size = 1;
+
 	insn->r.size = 1;
 
 

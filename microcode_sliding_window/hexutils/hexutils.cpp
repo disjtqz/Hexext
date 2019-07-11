@@ -433,11 +433,17 @@ bool gather_user_subinstructions(lvars_t* lvars,minsn_t* insn, mlist_t* CS_RESTR
 
 
 minsn_t* find_definition_backwards(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn, mlist_t* CS_RESTRICT mlist) {
-
+	minsn_t* curr;
 	if (insn == nullptr)
-		return nullptr;
+		insn = blk->tail;
 
-	minsn_t* curr = insn->prev;
+	else {
+		insn = insn->prev;
+	}
+	curr = insn;
+
+	if (!curr)
+		return nullptr;
 	mlist_t l{};
 	for (; curr; curr = curr->prev) {
 		
@@ -451,7 +457,11 @@ minsn_t* find_definition_backwards(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRI
 }
 
 minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn, mlist_t* CS_RESTRICT mlist) {
-	minsn_t* curr = insn->next;
+	minsn_t* curr;
+	if (!insn)
+		curr = blk->head;
+	else
+		curr = insn->next;
 	mlist_t l{};
 	for (; curr; curr = curr->next) {
 
@@ -1087,7 +1097,7 @@ using usage_gatherer_bblt128_t = usage_path_gatherer_tmpl_t<bitset128_t*>;
 using usage_gatherer_default_t = usage_path_gatherer_tmpl_t<bitset_t*>;
 
 
-void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
+bool gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 
 	bitset_t* visited_pool,
 	minsn_t* start,
@@ -1117,20 +1127,218 @@ void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 	if (mba->qty < 64) {
 		bitset64_t visited{};
 
-		usage_gatherer_bblt64_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
+		return usage_gatherer_bblt64_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
 	}
 	else if (mba->qty < 128) {
 		bitset128_t visited{};
 
-		usage_gatherer_bblt128_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
+		return usage_gatherer_bblt128_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
 	}
 	else {
 		visited_pool->clear();
-		usage_gatherer_default_t::gather_uses_in_path(uses, visited_pool, blk, list, prior, start);
+		return usage_gatherer_default_t::gather_uses_in_path(uses, visited_pool, blk, list, prior, start);
 	}
 
 }
 
+
+
+template<typename T>
+struct def_path_gatherer_tmpl_t {
+
+
+	CS_NOINLINE
+		static bool gather_inbound_defs(fixed_size_vecptr_t<minsn_t*> defs,
+
+			T visited_pool,
+			mblock_t* blk,
+			mlist_t* list) {
+
+
+		minsn_t* def = find_definition_backwards(blk, nullptr, list);
+
+
+		if (!def) {
+			for (auto&& def : blk->predset) {
+
+				if (visited_pool->has(def)) {
+					continue;
+				}
+				visited_pool->add(def);
+
+				auto nblk = blk->mba->natural[def];
+
+				if (!gather_inbound_defs(defs, visited_pool, nblk, list)) {
+					return false;
+				}
+
+			}
+		}
+		else {
+			if (!defs->push_back(def)) {
+				return false;
+			}
+		}
+
+		return true;
+
+	}
+
+	CS_NOINLINE
+		static bool no_redef_in_path(
+
+			T visited_pool,
+			mblock_t* blk,
+			minsn_t* after,
+			mblock_t* blockto,
+			mlist_t* list) {
+
+
+
+		if (blk->serial == blockto->serial)
+			return true;
+
+		visited_pool->add(blk->serial);
+		minsn_t* def = find_redefinition(blk, after, list);
+
+
+		if (!def) {
+			//hit single succ, no redef, succ is blockto
+			for (auto&& def : blk->succset) {
+				if (visited_pool->has(def))
+					continue;
+				if (!no_redef_in_path(visited_pool, blk->mba->natural[def], nullptr, blockto, list)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+};
+
+template<typename T>
+struct defblk_path_gatherer_tmpl_t {
+
+
+	CS_NOINLINE
+		static bool gather_inbound_defs_and_block(fixed_size_vecptr_t<gather_defblk_res_t> defs,
+
+			T visited_pool,
+			mblock_t* blk,
+			mlist_t* list) {
+
+
+		minsn_t* def = find_definition_backwards(blk, nullptr, list);
+
+
+		if (!def) {
+			for (auto&& def : blk->predset) {
+
+				if (visited_pool->has(def)) {
+					continue;
+				}
+				visited_pool->add(def);
+
+				auto nblk = blk->mba->natural[def];
+
+				if (!gather_inbound_defs_and_block(defs, visited_pool, nblk, list)) {
+					return false;
+				}
+
+			}
+		}
+		else {
+
+			if (!defs->push_back({ def, blk })) {
+				return false;
+			}
+		}
+
+		return true;
+
+	}
+};
+
+bool gather_defs(fixed_size_vecptr_t<minsn_t*> defs,
+
+	bitset_t* visited_pool,
+	mblock_t* blk,
+	mlist_t* list) {
+
+	mbl_array_t* mba = blk->mba;
+
+	if (mba->qty < 64) {
+		bitset64_t visited{};
+
+		return def_path_gatherer_tmpl_t<bitset64_t*>::gather_inbound_defs(defs, &visited, blk, list);
+
+	}
+	else if (mba->qty < 128) {
+		bitset128_t visited{};
+
+		return def_path_gatherer_tmpl_t<bitset128_t*>::gather_inbound_defs(defs, &visited, blk, list);
+	}
+	else {
+		visited_pool->clear();
+		return def_path_gatherer_tmpl_t<bitset_t*>::gather_inbound_defs(defs, visited_pool, blk, list);
+	}
+
+}
+
+bool gather_defs(fixed_size_vecptr_t<gather_defblk_res_t> defs,
+
+	bitset_t* visited_pool,
+	mblock_t* blk,
+	mlist_t* list) {
+
+	mbl_array_t* mba = blk->mba;
+
+	if (mba->qty < 64) {
+		bitset64_t visited{};
+
+		return defblk_path_gatherer_tmpl_t<bitset64_t*>::gather_inbound_defs_and_block(defs, &visited, blk, list);
+
+	}
+	else if (mba->qty < 128) {
+		bitset128_t visited{};
+
+		return defblk_path_gatherer_tmpl_t<bitset128_t*>::gather_inbound_defs_and_block(defs, &visited, blk, list);
+	}
+	else {
+		visited_pool->clear();
+		return defblk_path_gatherer_tmpl_t<bitset_t*>::gather_inbound_defs_and_block(defs, visited_pool, blk, list);
+	}
+
+}
+
+bool no_redef_in_path(bitset_t* visited_pool,
+	mblock_t* blkfrom,
+	minsn_t* start,
+	mblock_t* blockto,
+	mlist_t* list) {
+
+	mbl_array_t* mba = blkfrom->mba;
+
+	if (mba->qty < 64) {
+		bitset64_t visited{};
+
+		return def_path_gatherer_tmpl_t<bitset64_t*>::no_redef_in_path(&visited, blkfrom, start, blockto, list);
+
+	}
+	else if (mba->qty < 128) {
+		bitset128_t visited{};
+
+		return def_path_gatherer_tmpl_t<bitset128_t*>::no_redef_in_path(&visited, blkfrom, start, blockto, list);
+	}
+	else {
+		visited_pool->clear();
+		return def_path_gatherer_tmpl_t<bitset_t*>::no_redef_in_path(visited_pool, blkfrom, start, blockto, list);
+	}
+}
 bool mop_is_non_kreg_lvalue(mop_t* mop) {
 	return mop->is_lvalue() && (mop->t != mop_r || !is_kreg(mop->r));
 }
@@ -1244,4 +1452,11 @@ mop_t* resolve_lvalue(mop_t* input) {
 		return current;
 	}
 	return nullptr;
+}
+mblock_t* resolve_goto_block(mblock_t* blk) {
+
+	if (blk && blk->tail && blk->tail->op() == m_goto && blk->tail->l.t == mop_b) {
+		return blk->mba->natural[blk->tail->l.b];
+	}
+	return blk;
 }

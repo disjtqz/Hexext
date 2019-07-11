@@ -12,7 +12,7 @@
 mreg_t mr_data_seg = -1;
 mreg_t mr_code_seg = -1;
 rlist_t rlist_tempregs{};
-
+rlist_t rlist_all_ccs{};
 mreg_t mr_eax = -1, mr_ebx = -1,
 mr_ecx = -1, mr_edx = -1;
 mreg_t mr_t0 = -1,
@@ -151,6 +151,9 @@ static void preinit_mreg_info() {
 	//qsort(&g_mreg_info[0], g_max_mreg, sizeof(mreg_info_t), compare_mreg_info);
 	g_did_init_mregs = true;
 
+	for (unsigned r = mr_cf; r < mr_pf + 1; ++r) {
+		rlist_all_ccs.add(r);
+	}
 
 }
 

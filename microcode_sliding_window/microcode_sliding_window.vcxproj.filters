@@ -37,9 +37,6 @@
     <Filter Include="Header Files\mixins">
       <UniqueIdentifier>{c5b087ec-f378-401c-a3ad-d277a2fa3d94}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\preoptimization-postprocess">
-      <UniqueIdentifier>{704a60f9-f844-4a50-a015-7d7751479bdf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\preoptimization-postprocess">
       <UniqueIdentifier>{86612585-8421-4917-a82c-fc57280ee9ae}</UniqueIdentifier>
     </Filter>
@@ -72,6 +69,9 @@
     </Filter>
     <Filter Include="Releases">
       <UniqueIdentifier>{92cf19eb-9b13-46e2-8490-bd79f4385454}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\preoptimization-postprocess">
+      <UniqueIdentifier>{704a60f9-f844-4a50-a015-7d7751479bdf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -189,9 +189,6 @@
     <ClCompile Include="mvm\mvm_aarch64.cpp">
       <Filter>Source Files\mvm</Filter>
     </ClCompile>
-    <ClCompile Include="preoptimization-postprocess\prepostprocess.cpp">
-      <Filter>Source Files\mvm</Filter>
-    </ClCompile>
     <ClCompile Include="ctree\late_if_invert.cpp">
       <Filter>Source Files\ctree</Filter>
     </ClCompile>
@@ -224,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="combine_rules\cleanup_late_flag_ops.cpp">
       <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="preoptimization-postprocess\prepostprocess.cpp">
+      <Filter>Source Files\preoptimization-postprocess</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -459,6 +459,9 @@
       <Filter>Header Files\combine_rules</Filter>
     </ClInclude>
     <ClInclude Include="hexutils\smaller_bitsets.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\micropool.hpp">
       <Filter>Header Files\hexutils</Filter>
     </ClInclude>
   </ItemGroup>

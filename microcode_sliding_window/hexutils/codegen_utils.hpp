@@ -12,6 +12,7 @@ minsn_t* chain_setops_with_or(std::vector<minsn_t*>& chain, ea_t iea);
 void setup_subinsn_setcc_of_size(minsn_t* into, mcode_t setop, unsigned size, mop_t* l, mop_t* r = nullptr);
 
 void setup_bitand(minsn_t* andtest, mop_t* l, mop_t* r);
+void setup_bitor(minsn_t* andtest, mop_t* l, mop_t* r);
 /*
 	
 	generate setnz/z (x & y), 0 to size

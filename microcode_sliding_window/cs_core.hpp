@@ -564,7 +564,8 @@ public:
 	/*
 	This is not intended to handle datatypes that have destructors
 	*/
-	static_assert(std::is_pod_v<T>);
+	
+	//static_assert(!std::is_destructible_v<T>);
 	constexpr fixed_size_vector_t() : m_curr_size(0u), m_max_size(max_size), m_storage() {}
 
 	constexpr bool push_back(const T& v) {

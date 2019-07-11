@@ -399,6 +399,28 @@ struct minsn_unary_descend_t {
 class mop_t {
 public:
 
+	inline mop_t(mop_t&& other) noexcept {
+		t = other.t;
+		size = other.size;
+		oprops = other.oprops;
+		valnum = other.valnum;
+		d = other.d;
+		other.t = mop_z;
+		other.size = -1;
+	}
+
+	inline mop_t& operator =(mop_t&& other) noexcept {
+		erase();
+		t = other.t;
+		size = other.size;
+		oprops = other.oprops;
+		valnum = other.valnum;
+		d = other.d;
+		other.t = mop_z;
+		other.size = -1;
+		return *this;
+	}
+
 	mopt_t optype() const {
 		cs_assume_m(t < mop_last);
 		return t;
@@ -874,6 +896,35 @@ struct minsn_t {
 		return opcode;
 	}
 
+
+	inline minsn_t(minsn_t&& other) : l(std::move(other.l)), r(std::move(other.r)), d(std::move(other.d)) {
+		opcode = other.opcode;
+		iprops = other.iprops;
+		next = other.next;
+		prev = other.prev;
+		ea = other.ea;
+		other.opcode = m_nop;
+		other.next = nullptr;
+		other.prev = nullptr;
+		other.ea = BADADDR;
+
+	}
+
+	inline minsn_t& operator =(minsn_t&& other) {
+		opcode = other.opcode;
+		iprops = other.iprops;
+		next = other.next;
+		prev = other.prev;
+		ea = other.ea;
+		l = std::move(other.l);
+		r = std::move(other.r);
+		d = std::move(other.d);
+		other.opcode = m_nop;
+		other.next = nullptr;
+		other.prev = nullptr;
+		other.ea = BADADDR;
+		return *this;
+	}
 	
 	bool lr_both_size(unsigned sz) {
 		return l.size == sz && r.size == sz;
@@ -1779,7 +1830,7 @@ struct hexext_micro_filter_t
 
 
 
-
+#include "hexutils/micropool.hpp"
 
 namespace hexext_internal {
 	CS_COLD_CODE
@@ -1936,6 +1987,15 @@ bool mcode_is_set(mcode_t arg);
 static constexpr bool mcode_is_jconditional(mcode_t arg) {
 	return arg >= m_jcnd && arg < m_jtbl;
 }
+
+static constexpr bool mcode_is_jcc(mcode_t arg) {
+	return arg >= m_jnz && arg < m_jtbl;
+}
+
+static constexpr int jcc_to_setcc(mcode_t arg) {
+	return (arg - m_jnz) + m_setnz;
+}
+
 
 static constexpr bool mcode_is_flow(mcode_t arg) {
 	return (mcode_is_jconditional(arg) || arg == m_goto || arg == m_call || arg == m_icall || arg == m_jtbl || arg == m_ret || arg == m_ijmp );

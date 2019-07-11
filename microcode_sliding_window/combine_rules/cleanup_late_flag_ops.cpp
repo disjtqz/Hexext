@@ -155,28 +155,12 @@ COMB_RULE_IMPLEMENT(sift_down_flagcomps) {
 
 				insert_mov2_before(ccdef->ea, blk, ccdef, &moppy, &tempreg);
 
-				ccdef->l = tempreg;
+				ccdef->l = std::move(tempreg);
 			
 			}
 			return true;
 		};
-		/*
-		if (test_any_submop_in_mlist(&l, &interdefs, lvars)) {
-
-			mop_t tempreg{};
-			
-			mreg_t tr = find_unused_tr(ccdef->prev, i, l.size);
-
-			if (tr == -1)
-				return false;
-			
-			tempreg.make_reg(tr, l.size);
-			
-			insert_mov2_before(ccdef->ea, blk, ccdef, &l, &tempreg);
-
-			ccdef->l = tempreg;
-
-		}*/
+	
 
 		if (!decouple_from_insn(l) || !decouple_from_insn(r)) {
 			return false;
@@ -197,5 +181,242 @@ COMB_RULE_IMPLEMENT(sift_down_flagcomps) {
 	}
 
 	return did_change;
+
+}
+
+
+
+COMB_RULE_IMPLEMENT(interblock_jcc_deps_combiner) {
+	if (!hexext::ran_locopt())
+		return false;
+	auto i = state->insn();
+	auto blk = state->block();
+	if (!mcode_is_jconditional(i->op()))
+		return false;
+
+
+	mlist_t lst{};
+
+	generate_use_for_insn(blk->mba, i, &lst);
+	bool did_change = false;
+
+	for (unsigned cc = mr_cf; cc < mr_pf + 1; ++cc) {
+		if (!lst.reg.has(cc))
+			continue;
+		/*
+			gather single definition for flag
+		*/
+		fixed_size_vector_t<gather_defblk_res_t, 2> definitions{};
+
+		mlist_t lst_flag{};
+		lst_flag.reg.add(cc);
+		if (!gather_defs(definitions.pass(), state->bbidx_pool(), blk, &lst_flag) || definitions.size() != 1) {
+			continue;
+		}
+
+
+		fixed_size_vector_t<minsn_t*, 2> uses{};
+		gather_uses(uses.pass(), state->bbidx_pool(), i->prev, blk , &lst_flag, true);
+		if (uses.size() != 0)
+			continue;
+
+		mlist_t used_by_def{};
+		minsn_t* sifted_down = definitions[0].first;
+
+		if (!mcode_is_set(sifted_down->op()))
+			continue;
+
+		generate_use_for_insn(blk->mba, sifted_down, &used_by_def);
+
+		if (!no_redef_in_path(state->bbidx_pool(), definitions[0].second, definitions[0].first, blk, &used_by_def))
+			continue;
+		//definitions[0].second->remove_from_block(sifted_down);
+
+		//sifted_down->ea = i->ea;
+
+
+		minsn_t* dupboi = new minsn_t(BADADDR);
+		*dupboi = *sifted_down;
+		dupboi->d.erase();
+		dupboi->d.size = 1;
+		mop_t mop{};
+		mop.t = mop_d;
+		mop.size = 1;
+		mop.d = dupboi;
+		replace_cc_flag_mops_with_other_mop(i, cc, &mop);
+
+	//	blk->insert_into_block(sifted_down, nullptr);
+
+
+		did_change = true;
+		
+	}
+
+	return did_change;
+
+}
+
+COMB_RULE_IMPLEMENT(merge_shortcircuit_nosideeffects) {
+#if 0
+	auto i = state->insn();
+	if (!hexext::ran_locopt())
+		return false;
+	if (!mcode_is_jcc(i->op()))
+		return false;
+
+	auto blk = state->block();
+
+	if (blk->predset.size() != 2)
+		return false;
+
+	int common_pred = -1;
+	int noncommon_pred = -1;
+	/*for (auto&& p : blk->predset) {
+		auto pred = blk->mba->natural[p];
+
+		for (auto&& inp : pred->predset) {
+
+			if (blk->predset.has(inp) && inp != p && pred->succset.size() == 1) {
+
+				common_pred = inp;
+				noncommon_pred = p;
+				goto done_with_inner;
+			}
+		}
+	}
+done_with_inner:*/
+	mblock_t* target = blk->mba->natural[i->d.b];
+
+	
+
+	mblock_t* fallthrough = resolve_goto_block(blk->nextb);
+	
+	if (fallthrough == blk->nextb)
+		return false;
+
+	mblock_t* merger = nullptr;
+	bool is_or = false;
+	int new_goto_target = -1;
+	int new_jcc_target = i->d.b;
+	if (fallthrough->head == fallthrough->tail && fallthrough->head && mcode_is_jcc(fallthrough->head->op()) &&
+		fallthrough->head->d.t == mop_b && fallthrough->head->d.b == i->d.b) {
+		
+		merger = fallthrough;
+		is_or = true;
+
+		new_goto_target = fallthrough->nextb->serial;
+		
+	}
+
+
+	if (!merger)
+		return false;
+	
+
+
+	if (merger->tail != merger->head || !mcode_is_jcc(merger->tail->op()))
+		return false;
+
+	minsn_t* dupboi = new minsn_t(BADADDR);
+	*dupboi = *i;
+
+	dupboi->d.erase();
+	dupboi->d.size = 1;
+	dupboi->opcode = (mcode_t)jcc_to_setcc(i->op());
+
+	minsn_t* dupboi2 = new minsn_t(BADADDR);
+
+	*dupboi2 = *merger->tail;
+
+	dupboi2->opcode = (mcode_t)jcc_to_setcc(merger->tail->op());
+	dupboi2->d.erase();
+	dupboi2->d.size = 1;
+
+
+	minsn_t* band = new minsn_t(i->ea);
+
+	mop_t dup1{};
+	dup1.size = 1;
+	dup1.d = dupboi;
+	dup1.t = mop_d;
+	mop_t dup2{};
+	dup2.size = 1;
+	dup2.d = dupboi2;
+	dup2.t = mop_d;
+
+	
+	
+	if (!is_or) {
+		setup_bitand(band, &dup1, &dup2);
+		
+	}
+	else {
+		setup_bitor(band, &dup1, &dup2);
+	}
+
+	mop_t testcond{};
+	testcond.size = 1;
+	testcond.d = band;
+	testcond.t = mop_d;
+
+	i->opcode = m_jnz;
+
+	//i->d.make_blkref(new_jcc_target);
+
+	i->l = std::move(testcond);
+	i->r.make_number(0ULL, 1);
+	fallthrough->head->l.b = new_goto_target;
+
+
+
+	
+
+
+
+	msg("Got un\n");
+	return true;
+#else
+return false;
+#endif
+}
+/*
+180008b41 : jbe (sub rcx.4, #55.4).4, #1.4, 4
+Block 2 - 180008b43 to 180008b4b. Flags = 48.
+180008b49 : jbe (sub rcx.4, #15.4).4, #1.4, 4
+Block 3 - 180008b4b to 180008b4f. Flags = 48.
+*/
+COMB_RULE_IMPLEMENT(distribute_constant_sub_in_const_comp) {
+
+	auto i = state->insn();
+
+	if (!mcode_is_set(i->op()) && !mcode_is_jcc(i->op()))
+		return false;
+
+	auto [inner_insn, const_term] = i->arrange_by(mop_d, mop_n);
+
+	if (!inner_insn)
+		return false;
+
+
+	auto [subtractor, innersubconst, innersubterm] = inner_insn->descend_to_binary_insn(m_sub, mop_n);
+
+	if (!subtractor)
+		return false;
+
+
+	if (innersubconst != &subtractor->r)
+		return false;
+	uint64_t comp;
+	const_term->is_constant(&comp, false);
+	uint64_t bound;
+	innersubconst->is_constant(&bound, false);
+
+	const_term->nnn->update_value(bound + comp);
+
+	mop_t tempboi{ std::move(*innersubterm) };
+
+	*inner_insn = std::move(tempboi);
+
+	return true;
 
 }

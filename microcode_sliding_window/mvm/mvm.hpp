@@ -19,6 +19,8 @@ extern unsigned g_max_mreg;
 extern mreg_t mr_data_seg;
 extern mreg_t mr_code_seg;
 extern rlist_t rlist_tempregs;
+
+extern rlist_t rlist_all_ccs;
 namespace _mvm_internal {
 	
 	void insert_abs_mreg(const char* name, unsigned mreg, unsigned size);

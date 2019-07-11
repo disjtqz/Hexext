@@ -344,7 +344,7 @@ bool minsn_has_any_tempreg(minsn_t* insn);
 
 bool get_static_value(mop_t* v, uint64_t* out);
 
-void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
+bool gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 	/*
 		fixed size vector, intended to be reused
 		acts as a set of visited basic blocks
@@ -353,7 +353,32 @@ void gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 	minsn_t* start,
 	mblock_t* blk,
 	mlist_t* list, bool prior);
+/*
+	returns false if it failed to gather all uses due to the size of the defs vector
+*/
+bool gather_defs(fixed_size_vecptr_t<minsn_t*> defs,
 
+	bitset_t* visited_pool,
+	mblock_t* blk,
+	mlist_t* list);
+
+struct gather_defblk_res_t {
+	minsn_t* first;
+	mblock_t* second;
+};
+
+bool gather_defs(fixed_size_vecptr_t<gather_defblk_res_t> defs,
+
+	bitset_t* visited_pool,
+	mblock_t* blk,
+	mlist_t* list);
+
+
+bool no_redef_in_path(bitset_t* visited_pool,
+	mblock_t* blkfrom,
+	minsn_t* start,
+	mblock_t* blockto,
+	mlist_t* list);
 
 void lvalue_mop_to_argloc(lvars_t* lvars, argloc_t* aloc, mop_t* mop);
 
@@ -390,5 +415,8 @@ mreg_t allocate_tempreg_unused_in_block_range(mblock_t* blk, unsigned size);
 	traverse xdu and low until we get out lvalue
 */
 mop_t* resolve_lvalue(mop_t* input);
+
+mblock_t* resolve_goto_block(mblock_t* blk);
+
 #include "codegen_utils.hpp"
 #include "micro_executor_template.hpp"

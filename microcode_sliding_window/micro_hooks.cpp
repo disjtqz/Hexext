@@ -190,11 +190,13 @@ static int dispatch_combinsn(mblock_t* block, minsn_t* insn) {
 
 
 	*/
-#if 1
+#if 0
 	auto done = [block, insn]() {
 		run_combinsn_fixups(block, insn);
 		return 1;
 	};
+#else
+	auto done = []() {return 1; };
 #endif
 
 	/*if (insn->iprops & IPROP_DONT_COMB)

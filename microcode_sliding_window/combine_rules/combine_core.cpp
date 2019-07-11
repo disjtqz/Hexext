@@ -394,6 +394,7 @@ static mcombiner_rule_t* g_allrules[] = {
 	//& sets_negated_bool_to_zftest,
 //	& xor_xy_sets_to_sets_and,
 	& stx_stx_combine,
+
 	//& join_zf_jcnd
 	//combine_bnot_and_1,
 	/*combine_jzf_and_bnot,
@@ -406,7 +407,7 @@ static mcombiner_rule_t* g_allrules[] = {
 
 	division_magic_num_rule_1,
 	shl_and_low,
-	//combine_shr_shl_bittest_by_same_variable,
+	,
 	*/
 	&combine_or_shift,
 	&div_and_mul_in_conditional_to_modulus_test,
@@ -418,7 +419,11 @@ static mcombiner_rule_t* g_allrules[] = {
 	& detect_bitwise_negate_floatop,
 	& locate_abs_value_floatpath,
 	& combine_ltzero_result_shifted_to_highbit,
-	& sift_down_flagcomps
+	& sift_down_flagcomps,
+	& interblock_jcc_deps_combiner,
+	& merge_shortcircuit_nosideeffects,
+	& distribute_constant_sub_in_const_comp,
+	&division_magic_num_rule_1
 };
 
 void toggle_common_combination_rules(bool enabled) {

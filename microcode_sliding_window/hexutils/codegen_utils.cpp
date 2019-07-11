@@ -131,7 +131,15 @@ void setup_bitand(minsn_t* andtest, mop_t* l, mop_t* r) {
 	andtest->d.size = andtest->r.size;
 }
 
+void setup_bitor(minsn_t* andtest, mop_t* l, mop_t* r) {
+	cs_assert(andtest && l && r && l->t != mop_z && r->t != mop_z && l->size == r->size && (signed)l->size > 0);
+	andtest->opcode = m_or;
 
+	andtest->l = *l;
+	andtest->r = *r;
+	andtest->d.erase();
+	andtest->d.size = andtest->r.size;
+}
 void setup_ztest_bitand(minsn_t* into, bool z, mop_t* l, mop_t* r, unsigned size ){
 	cs_assert(into && (int)size > 0 && l && r && l->size == r->size && into->ea != BADADDR);
 

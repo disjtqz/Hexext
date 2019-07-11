@@ -639,6 +639,7 @@
     <ClInclude Include="hexdefs.hpp" />
     <ClInclude Include="hexutils\codegen_utils.hpp" />
     <ClInclude Include="hexutils\hexutils.hpp" />
+    <ClInclude Include="hexutils\micropool.hpp" />
     <ClInclude Include="hexutils\micro_executor_template.hpp" />
     <ClInclude Include="hexutils\smaller_bitsets.hpp" />
     <ClInclude Include="hexutils\traverse_micro.hpp" />

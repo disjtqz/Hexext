@@ -4,8 +4,12 @@
 
 static uint64_t emulate_mul128_shift(uint64_t multiplier, unsigned shrcount, uint64_t input_value) {
 	uint64_t highprod;
-	_mulx_u64(multiplier, input_value, &highprod);
 
+#ifdef __AVX2__
+	_mulx_u64(multiplier, input_value, &highprod);
+#else
+	_mul128(multiplier, input_value, (long long*)&highprod);
+#endif
 	return highprod >> shrcount;
 }
 
@@ -16,12 +20,16 @@ mul (xdu #16397105843297379215.8, .-1).16, (xdu (ldx ds.2, (add rdi.8, #80.8).8)
 ).16
 ).8, #3.1
 */
-bool division_magic_num_rule_1(mblock_t* block, minsn_t* insn) {
-	
+
+COMB_RULE_IMPLEMENT(division_magic_num_rule_1) {
+	auto insn = state->insn();
 	if (insn->opcode != m_shr)
 		return false;
-	mop_t* nonconst;
+	/*mop_t* nonconst;
 	mop_t* constoper = insn->get_eitherlr(mop_n, &nonconst);
+	*/
+
+	auto [constoper, nonconst] = insn->arrange_by(mop_n);
 
 	if (!constoper)
 		return false;
@@ -59,7 +67,7 @@ bool division_magic_num_rule_1(mblock_t* block, minsn_t* insn) {
 		else {
 			return false;
 		}
-	
+
 	}
 
 	xdu_const = extracted.xdu_operand();
@@ -74,19 +82,24 @@ bool division_magic_num_rule_1(mblock_t* block, minsn_t* insn) {
 	unsigned sim_shift = constoper->nnn->value;
 	uint64_t multiplier = xdu_const->nnn->value;
 	uint64_t numerator_one = 0;
-
+	/*
+		todo: do a binary search instead
+	*/
 	for (; ; ++numerator_one) {
 		if (emulate_mul128_shift(multiplier, sim_shift, numerator_one)) {
 			break;
+		}
+		if (numerator_one == 4096) {
+			return false;
 		}
 	}
 	unsigned parent_size = hexext::get_parent_mop_size();
 	insn->opcode = m_udiv;
 
-	
+
 	mop_t tempmop;
-	
-	if(extracted_nonconst.m_fromsize == parent_size)
+
+	if (extracted_nonconst.m_fromsize == parent_size)
 		tempmop = *extracted_nonconst.xdu_operand();
 
 	else {
@@ -94,21 +107,14 @@ bool division_magic_num_rule_1(mblock_t* block, minsn_t* insn) {
 		tempmop.size = parent_size;
 	}
 
-	/*constoper->nnn->value = numerator_one;
-	constoper->nnn->org_value = numerator_one;*/
+
 	constoper->nnn = new mnumber_t(numerator_one);
-	constoper->size = parent_size;// extracted_nonconst.fromsize();
+	constoper->size = parent_size;
 
 
-	//tempmop.steal_from(extracted_nonconst.xdu_operand());
-	
-	/*nonconst->erase();
-	nonconst->steal_from(&tempmop);
-	nonconst->size = constoper->size;*/
 
-	*nonconst = tempmop;
+	*nonconst = std::move(tempmop);
 	nonconst->size = parent_size;
 	return true;
-	
-	
+
 }

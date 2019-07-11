@@ -86,7 +86,55 @@ bool recognize_round_down_power2_t::run_combine(mcombine_t* state) {
 
 	if (nextuse->opcode != m_or)
 		return false;
+	return false;
 
 
+}
+
+/*
+add (
+or (
+or (
+shr (
+or (
+shr (
+or (
+shr (
+or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4, #4.1).4, (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4).4, #8.1).4, (or (shr (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4, #4.1).4, (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4).4).4, (shr (or (shr (or (shr (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4, #4.1).4, (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4).4, #8.1).4, (or (shr (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4, #4.1).4, (or (shr (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4, #2.1).4, (or (shr (sub rbp.4, #1.4).4, #1.1).4, (sub rbp.4, #1.4).4).4).4).4).4, #16.1).4
+).4
+, #1.4, rax.4
+
+
+
+((((((((
+(unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 4) | 
+((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 8) | 
+((((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 4) | 
+((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1) | 
+((((((((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2)
+| ((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 4) |
+((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 8) | 
+((((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) | 
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 4) | 
+((((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 2) |
+((unsigned int)(v12 - 1) >> 1) | (v12 - 1)) >> 16))
+				  + 1;
+
+*/
+
+COMB_RULE_IMPLEMENT(recognize_overcombined_round_up_pow2) {
+	auto insn = state->insn();
+
+
+	auto [constval, insnval] = insn->arrange_by(mop_n, mop_d);
+	if (insn->op() != m_add || !constval || !constval->is_equal_to(1,false))
+		return false;
+
+	return false;
 
 }
