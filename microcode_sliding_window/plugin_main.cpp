@@ -38,6 +38,20 @@ hexext_arch_e hexext::currarch() {
 }
 
 
+constexpr uintptr_t the_offs = 0x73518AE0ull - 0x732B0000ull;
+
+bool dump_the_patterns(mbl_array_t* unused) {
+	qvector<mbl_array_t*>* pats = 
+		reinterpret_cast<qvector<mbl_array_t*>*>(((uintptr_t)get_hexmod()) + the_offs);
+
+	for (auto&& pat : *pats) {
+		dump_mba(pat);
+	}
+	
+	return false;
+}
+
+
 CS_COLD_CODE
 int idaapi init(void)
 {
@@ -66,10 +80,16 @@ int idaapi init(void)
 	cs_assert(hexver);
 
 	if (!strcmp("7.0.0.170914", hexver)) {
-
-	//	hexext::install_glbopt_cb(dump_microcode_);
+#if 0
+		hexext::install_glbopt_cb(dump_microcode_);
+#endif
+#if 0
+		hexext::install_glbopt_cb(dump_the_patterns);
+#endif
 		msg("Hexext is loaded! Use Ctrl-2 to toggle optimizations on and off!\n");
 		
+		cs_assert(init_hexmod(g_currarch == hexext_arch_e::ARM));
+
 		
 		return PLUGIN_KEEP;
 	}

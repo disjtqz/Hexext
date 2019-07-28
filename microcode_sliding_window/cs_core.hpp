@@ -621,6 +621,7 @@ constexpr uint64_t highbit_for_size(unsigned size) {
 	return (1ULL << ((size * 8) - 1));
 }
 
+
 namespace cs::const_ops {
 	template<typename  tmpl_eletype, unsigned tmpl_nelements>
 	constexpr void quicksort_const(fixed_size_vector_t<tmpl_eletype, tmpl_nelements>& arr) {
@@ -657,3 +658,12 @@ namespace cs::const_ops {
 		return c1 - c2;
 	}
 }
+
+
+struct u64_comp_interval_t {
+	uint64_t low;
+	uint64_t high;
+};
+
+bool make_compare_interval_from_sorted_range(fixed_size_vecptr_t<u64_comp_interval_t> ivls, fixed_size_vecptr_t<uint64_t> outliers,
+	fixed_size_vecptr_t<uint64_t> input);

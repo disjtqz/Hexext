@@ -550,6 +550,7 @@
     <ClCompile Include="combine_rules\combine_x86_64_bitand_high.cpp" />
     <ClCompile Include="combine_rules\division_magic_number_rules.cpp" />
     <ClCompile Include="combine_rules\div_and_mul_by_same_const_to_mask.cpp" />
+    <ClCompile Include="combine_rules\memory_oper_rules.cpp" />
     <ClCompile Include="combine_rules\pow2_rounding_recognizers.cpp" />
     <ClCompile Include="combine_rules\raise_bitlut_test_to_multieq_compare.cpp" />
     <ClCompile Include="combine_rules\rewrite_float_bitops.cpp" />
@@ -560,6 +561,7 @@
     <ClCompile Include="ctree\ctree.cpp" />
     <ClCompile Include="ctree\late_if_invert.cpp" />
     <ClCompile Include="exrole\exrole.cpp" />
+    <ClCompile Include="hexmod.cpp" />
     <ClCompile Include="hexutils\codegen_utils.cpp" />
     <ClCompile Include="hexutils\hexutils.cpp" />
     <ClCompile Include="hexutils\potential_bits.cpp" />
@@ -607,6 +609,7 @@
     <ClInclude Include="combine_rules\combine_x86_64_bitand_high.hpp" />
     <ClInclude Include="combine_rules\division_magic_number_rules.hpp" />
     <ClInclude Include="combine_rules\div_and_mul_by_same_const_to_mask.hpp" />
+    <ClInclude Include="combine_rules\memory_oper_rules.hpp" />
     <ClInclude Include="combine_rules\pow2_rounding_recognizers.hpp" />
     <ClInclude Include="combine_rules\raise_bitlut_test_to_multieq_compare.hpp" />
     <ClInclude Include="combine_rules\rewrite_float_bitops.hpp" />

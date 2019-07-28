@@ -18,6 +18,7 @@
 #include "simd_bitops_simplify.hpp"
 #include "rewrite_float_bitops.hpp"
 #include "cleanup_late_flag_ops.hpp"
+#include "memory_oper_rules.hpp"
 class negated_sets_t : public mcombiner_rule_t {
 public:
 	virtual bool run_combine(mcombine_t* state);
@@ -292,90 +293,6 @@ bool xor_xy_sets_to_sets_and_t::run_combine(mcombine_t* state) {
 
 xor_xy_sets_to_sets_and_t xor_xy_sets_to_sets_and{};
 
-class stx_stx_combine_t : public mcombiner_rule_t {
-public:
-	virtual bool run_combine(mcombine_t* state);
-
-	virtual const char* name() const {
-		return "Sequential commutative STX/LDX combine";
-	}
-};
-
-/*
-1711ae68 : stx (and (ldx ds.2, (add rbx.8, #52.8).8).4, #4294967263.4).4, ds.2, (add rbx.8, #52.8).8
-1711ae6f : stx (or (xdu (and rax.1, #32.1).1, .-1).4, (ldx ds.2, (add rbx.8, #52.8).8).4).4, ds.2, (add rbx.8, #52.8).8
-*/
-bool stx_stx_combine_t::run_combine(mcombine_t* state) {
-
-	auto ins = state->insn();
-	auto blk = state->block();
-	if (!is_definitely_topinsn_p(ins) || ins->op() != m_stx)
-		return false;
-
-	if (!ins->next || ins->next->op() != m_stx)
-		return false;
-
-	
-	mop_t* value_first;
-	mop_t* value_second;
-
-	if (!try_extract_equal_stx_dests(ins, ins->next, &value_first, &value_second))return false;
-
-
-	if (value_first->t != mop_d || value_second->t != mop_d) {
-		return false;
-	}
-
-	if(!is_mcode_commutative(value_first->d->op()) || !is_mcode_commutative(value_second->d->op()))
-		return false;
-
-	//auto [andinsn,ff,fff] = value_first->descend_to_binary_insn(m_and, mop_d);
-
-	auto andinsn = value_first->d;
-
-	if (!andinsn)
-		return false;
-
-	auto orinsn = value_second->d;//value_second->descend_to_binary_insn(m_or, mop_d);
-
-	if (!orinsn)
-		return false;
-
-	auto [and_ldx, and_nonldx] = andinsn->arrange_by_insn(m_ldx);
-
-	if (!and_ldx)
-		return false;
-
-	auto [or_ldx, or_nonldx] = orinsn->arrange_by_insn(m_ldx);
-
-	if (!or_ldx)
-		return false;
-
-	if (!equal_ldx_srcs(or_ldx->d, and_ldx->d))
-		return false;
-	if (!ldx_src_equals_stx_dest(or_ldx->d, ins))
-		return false;
-	/*
-		now we just gotta combine em
-	*/
-	minsn_t* dupboi = new minsn_t(BADADDR);
-	*dupboi = *andinsn;
-
-	minsn_t* lel = or_ldx->d;
-
-	or_ldx->d = dupboi;
-
-	delete lel;
-
-	//blk->remove_from_block(ins);
-
-	ins->opcode = m_nop;
-	//delete ins;
-	return true;
-
-}
-
-stx_stx_combine_t stx_stx_combine{};
 
 
 
@@ -423,7 +340,12 @@ static mcombiner_rule_t* g_allrules[] = {
 	& interblock_jcc_deps_combiner,
 	& merge_shortcircuit_nosideeffects,
 	& distribute_constant_sub_in_const_comp,
-	&division_magic_num_rule_1
+	&division_magic_num_rule_1,
+	&preload_repetitive_ldx,
+	& replace_boolean_flow_with_boolean_logic,
+	& merge_short_circuit_or_with_no_side_effects,
+	& merge_multi_setz_chain_interval,
+	& interblock_flagop_merger
 };
 
 void toggle_common_combination_rules(bool enabled) {

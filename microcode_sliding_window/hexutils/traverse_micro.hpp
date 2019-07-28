@@ -68,7 +68,7 @@ enum traversal_exflags_e : uint64_t {
 };
 
 template<typename traversal_traits, uint64_t exflags = 0,typename TParam = void, typename TCallable = void>
-static inline void traverse_micro(TParam* parm, TCallable&& callable) {
+static CS_FORCEINLINE void traverse_micro(TParam* parm, TCallable&& callable) {
 	constexpr unsigned AUXSTACK_SIZE = traversal_traits::AUXSTACK_SIZE;
 	constexpr bool maintain_context_ptrs = traversal_traits::maintain_context_ptrs;
 
@@ -254,7 +254,7 @@ static inline void traverse_micro(TParam* parm, TCallable&& callable) {
 	faster than a recursive approach like the one hexrays uses internally
 */
 template<typename traversal_traits, typename TCallable>
-static inline void traverse_minsn(minsn_t * insn, TCallable && callable) {
+static CS_FORCEINLINE void traverse_minsn(minsn_t * insn, TCallable && callable) {
 	/*
 	only need to store references to mop_f, mop_d, and mop_p
 

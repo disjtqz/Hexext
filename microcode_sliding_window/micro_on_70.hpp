@@ -450,6 +450,15 @@ public:
 		t = mop_d;
 	}
 
+	static mop_t subinsn(minsn_t* insn, unsigned size) {
+		mop_t result{};
+		result.assign_insn(insn, size);
+		return result;
+
+	}
+
+
+
 	void steal_from(mop_t* out) {
 
 		t = out->t;
@@ -944,6 +953,12 @@ struct minsn_t {
 		return l.t == ty || r.t == ty;
 	}
 
+	void make_nop() {
+		opcode = m_nop;
+		d.erase();
+		l.erase();
+		r.erase();
+	}
 
 	mop_t* __fastcall find_num_op(mop_t** other);
 	bool is_like_move() const {
@@ -1076,7 +1091,7 @@ struct minsn_t {
 
 	
   /// Constructor
-	minsn_t(ea_t _ea) { init(_ea); }
+	minsn_t(ea_t _ea = BADADDR) { init(_ea); }
 	minsn_t(const minsn_t& m) { next = prev = NULL; copy(m); }
 	DEFINE_MEMORY_ALLOCATION_FUNCS();
 
@@ -1089,6 +1104,16 @@ struct minsn_t {
 	void hexapi swap(minsn_t* m);
 	void swap(minsn_t& m) {
 		swap(&m);
+	}
+
+	static minsn_t* cloneptr(minsn_t* other) {
+		minsn_t* result = new minsn_t(BADADDR);
+		*result = *other;
+		return result;
+	}
+	static minsn_t* clonemoveptr(minsn_t* other) {
+		minsn_t* result = new minsn_t(std::move(*other));
+		return result;
 	}
 
 	  /// \defgroup IPROP_ instruction property bits
@@ -1141,11 +1166,11 @@ enum mblock_type_t
 {
 	BLT_NONE = 0, ///< unknown block type
 	BLT_STOP = 1, ///< stops execution regularly (must be the last block)
-	BLT_0WAY = 2, ///< does not have successors (tail is a noret function)
-	BLT_1WAY = 3, ///< passes execution to one block (regular or goto block)
-	BLT_2WAY = 4, ///< passes execution to two blocks (conditional jump)
-	BLT_NWAY = 5, ///< passes execution to many blocks (switch idiom)
-	BLT_XTRN = 6, ///< external block (out of function address)
+//	BLT_0WAY = 2, ///< does not have successors (tail is a noret function)
+	BLT_1WAY = 2, ///< passes execution to one block (regular or goto block)
+	BLT_2WAY = 3, ///< passes execution to two blocks (conditional jump)
+	BLT_NWAY = 4, ///< passes execution to many blocks (switch idiom)
+	//BLT_XTRN = 6, ///< external block (out of function address)
 };
 #define MBL_PUSH	0x10
 #define MBL_PROP   (1 << 10)
@@ -1314,7 +1339,8 @@ struct mblock_t
 	signed int serial;
 	_BYTE gap_12C[4];
 	mbl_array_t* mba;
-	_QWORD maxbsp;
+	_DWORD type;
+	_DWORD maxbsp;
 	int minbstkref;
 	int minbargref;
 	qvector<int> predset;
@@ -2294,3 +2320,14 @@ static inline std::pair<mop_t*, mop_t*> order_mops(mopt_t ty, mop_t* x, mop_t* y
 		return { y,x };
 	return { nullptr,nullptr };
 }
+
+/*
+	setup pointer to the base of the hexrays plugin in memory. done by plugin init
+
+*/
+bool init_hexmod(bool is_arm);
+
+/*
+	get base of hexarm.dll/hexrays.dll/hexx64.dll/hexarm64.dll
+*/
+void* get_hexmod();

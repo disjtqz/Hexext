@@ -37,7 +37,14 @@ std::string print_insn(minsn_t* ins, bool addr) {
 	}
 
 	result += " ";
-	result += print_mop(&ins->l) + ", " + print_mop(&ins->r) + (ins->d.t == mop_z ? "" : ", " + print_mop(&ins->d));
+	if (ins->r.t == mop_z && ins->d.t == mop_z) {
+		result += print_mop(&ins->l);
+	}
+	else if (ins->r.t == mop_z && ins->d.t != mop_z) {
+		result += print_mop(&ins->l) + ", " + print_mop(&ins->d);
+	}
+	else
+		result += print_mop(&ins->l) + ", " + print_mop(&ins->r) + (ins->d.t == mop_z ? "" : ", " + print_mop(&ins->d));
 	if (!addr)
 		return result;
 	else {
@@ -141,6 +148,9 @@ std::string print_mop(mop_t* mop) {
 	case mop_d:
 		result += "(" + print_insn(mop->d, false) + ")";
 
+		if (mcode_is_set(mop->d->op())) {
+			needsize = false;
+		}
 		break;
 
 

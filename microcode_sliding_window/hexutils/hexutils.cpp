@@ -23,14 +23,14 @@ static bool is_sign_sar(mop_t* mop) {
 
 bool try_extract_mulp2_by_const(minsn_t* insn, mulp2_const_t* out) {
 
-	
-	
+
+
 	minsn_t* shlins = insn;
 	uint64_t shlval;
-	
+
 	mop_t* nonconstptr;
 	mop_t* constvalptr;
-	
+
 	out->m_targetinsn = insn;
 
 	if (shlins->opcode != m_shl) {
@@ -65,7 +65,7 @@ bool try_extract_mulp2_by_const(minsn_t* insn, mulp2_const_t* out) {
 		shlval = shlins->r.nnn->value;
 	}
 
-	
+
 	out->m_actual_insn = insn;
 	out->m_shiftcount = shlval;
 	out->m_numop = constvalptr;
@@ -181,9 +181,9 @@ bool try_extract_mul_by_constant(minsn_t* CS_RESTRICT insn, mul_by_constant_extr
 		out->m_mulinsn = insn;
 		out->m_mutable = &insn->l;
 		out->m_mulvalue = extend_value_by_size_and_sign(1ULL << insn->r.nnn->value, insn->l.size, false);
-		
+
 		return true;
-		
+
 	}
 	else {
 		return false;
@@ -221,7 +221,7 @@ bool try_extract_udiv_by_constant(minsn_t* CS_RESTRICT insn, udiv_by_constant_ex
 static constexpr unsigned g_oplut_length = mop_last;
 using oplut_t = uint16_t;
 
-static constexpr void init_oplut(oplut_t & lut) {
+static constexpr void init_oplut(oplut_t& lut) {
 
 }
 
@@ -255,13 +255,13 @@ static inline void add_mop_to_mlist_inline(mop_t* CS_RESTRICT mop, mlist_t* CS_R
 	auto t = mop->t;
 	if (!instruction_set_is_member(lut_is_mlist_addable, t))
 		return;
-	
+
 	unsigned sz = mop->size;
 	if (t == mop_r) {
 		mlist->reg.add_(mop->r, sz);
 	}
 	else if (t == mop_S) {
-		ivl_t v{ mop->s->off , sz};
+		ivl_t v{ mop->s->off , sz };
 
 		mlist->mem.add(v);
 	}
@@ -274,8 +274,8 @@ static inline void add_mop_to_mlist_inline(mop_t* CS_RESTRICT mop, mlist_t* CS_R
 			mlist->reg.add_(lvar.get_reg1() + off, sz);
 		}
 		else if (lvar.is_stk_var()) {
-			ivl_t v{ lvar.location.stkoff(), sz};
-		
+			ivl_t v{ lvar.location.stkoff(), sz };
+
 			mlist->mem.add(v);
 		}
 
@@ -303,7 +303,7 @@ static inline bool test_mop_in_mlist_local(mop_t* CS_RESTRICT mop, mlist_t* CS_R
 	else if (t == mop_S) {
 		ivl_t v{ mop->s->off , sz };
 
-	//	mlist->mem.add(v);
+		//	mlist->mem.add(v);
 		return mlist->mem.has(v);
 	}
 	else if (t == mop_l) {
@@ -349,13 +349,13 @@ struct test_submop_trav {
 	static constexpr bool may_term_flow = true;
 };
 bool test_any_submop_in_mlist(mop_t* CS_RESTRICT mop, mlist_t* CS_RESTRICT mlist, lvars_t* CS_RESTRICT lvars) {
-	
+
 	bool res = false;
-	traverse_micro < test_submop_trav>(mop, [&res, mlist, lvars](mop_t * m) {
+	traverse_micro < test_submop_trav>(mop, [&res, mlist, lvars](mop_t* m) {
 		if (test_mop_in_mlist(m, mlist, lvars)) {
 			res = true;
 			return true;
-			}
+		}
 		return false;
 		});
 
@@ -367,15 +367,15 @@ void generate_use_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT
 	lvars_t* CS_RESTRICT lvars = &mba->vars;
 
 
-	traverse_minsn<gen_use_traversal_traits>(insn, [mlist, mba, lvars](mop_t * mop) {
+	traverse_minsn<gen_use_traversal_traits>(insn, [mlist, mba, lvars](mop_t* mop) {
 		add_mop_to_mlist_inline(mop, mlist, lvars);
-	});
+		});
 }
 
 void generate_def_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT mlist) {
 	add_mop_to_mlist_inline(&insn->d, mlist, &mba->vars);
 
-	traverse_minsn<gen_use_traversal_traits>(insn, [mlist](mop_t * mop) {
+	traverse_minsn<gen_use_traversal_traits>(insn, [mlist](mop_t* mop) {
 		if (mop->t != mop_f)
 			return;
 
@@ -385,7 +385,7 @@ void generate_def_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT
 		mlist->reg.add(cl->spoiled.reg);
 
 
-	});
+		});
 }
 
 
@@ -393,18 +393,18 @@ void generate_def_for_insn(mbl_array_t* mba, minsn_t* insn, mlist_t* CS_RESTRICT
 /*
 	Will return true if it did not exceed the max size of the fixed size array that was passed in by the user
 */
-bool gather_user_subinstructions(lvars_t* lvars,minsn_t* insn, mlist_t* CS_RESTRICT list, fixed_size_vecptr_t<minsn_t*> into) {
+bool gather_user_subinstructions(lvars_t* lvars, minsn_t* insn, mlist_t* CS_RESTRICT list, fixed_size_vecptr_t<minsn_t*> into) {
 
 	bool did_exceed_size = false;
-	traverse_minsn< gen_use_traversal_traits>(insn, [&did_exceed_size, list, into, lvars](mop_t * mop) {
+	traverse_minsn< gen_use_traversal_traits>(insn, [&did_exceed_size, list, into, lvars](mop_t* mop) {
 		if (mop->t != mop_d) {
 			return;
 		}
 
-		minsn_t*  d = mop->d;
+		minsn_t* d = mop->d;
 
-		if (test_mop_in_mlist_local(&d->l, list, lvars) || test_mop_in_mlist_local(&d->r, list, lvars) ) {
-	do_the_deed:
+		if (test_mop_in_mlist_local(&d->l, list, lvars) || test_mop_in_mlist_local(&d->r, list, lvars)) {
+		do_the_deed:
 			did_exceed_size |= !(into->push_back(d));
 			return;
 		}
@@ -421,7 +421,7 @@ bool gather_user_subinstructions(lvars_t* lvars,minsn_t* insn, mlist_t* CS_RESTR
 
 
 
-	});
+		});
 
 	return !did_exceed_size;
 
@@ -446,7 +446,7 @@ minsn_t* find_definition_backwards(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRI
 		return nullptr;
 	mlist_t l{};
 	for (; curr; curr = curr->prev) {
-		
+
 		generate_def_for_insn(blk->mba, curr, &l);
 
 		if (l.mem.has_common_(&mlist->mem) || l.reg.has_common(mlist->reg)) {
@@ -474,12 +474,12 @@ minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn,
 	return nullptr;
 }
 
-minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed ) {
+minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed) {
 	minsn_t* curr = insn->next;
 	mlist_t l{};
 	mlist_t def{};
-	if(redefed)
-	*redefed = false;
+	if (redefed)
+		* redefed = false;
 	for (; curr; curr = curr->next) {
 
 		generate_use_for_insn(blk->mba, curr, &l);
@@ -493,7 +493,7 @@ minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redef
 		if (def.mem.has_common_(&mlist->mem) || def.reg.has_common(mlist->reg))
 		{
 			if (redefed)
-			*redefed = true;
+				* redefed = true;
 			return nullptr;
 		}
 
@@ -521,8 +521,8 @@ minsn_t* find_prev_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* defed
 			return curr;
 		}
 
-	
-		
+
+
 	}
 	return nullptr;
 }
@@ -556,7 +556,7 @@ static bool find_definition_size_impl(mblock_t* block, minsn_t* insn, unsigned* 
 			return false;
 		for (auto&& predidx : block->predset) {
 
-			if (visited->has(predidx) ) {
+			if (visited->has(predidx)) {
 				return false;
 			}
 			else {
@@ -637,8 +637,8 @@ mop_t* locate_first_mreg_use_in_insn(minsn_t* insn, mreg_t mreg, unsigned mreg_s
 
 	mop_t* result = nullptr;
 
-	traverse_minsn<locate_mreg_traversal_traits>(insn, [&result, mreg, mreg_size](mop_t * CS_RESTRICT mop) {
-		
+	traverse_minsn<locate_mreg_traversal_traits>(insn, [&result, mreg, mreg_size](mop_t* CS_RESTRICT mop) {
+
 		if (mop->t == mop_f) {
 			mcallinfo_t* callinf = mop->f;
 
@@ -651,7 +651,7 @@ mop_t* locate_first_mreg_use_in_insn(minsn_t* insn, mreg_t mreg, unsigned mreg_s
 				return true;//redefeddd
 			}
 		}
-		
+
 		if (mop->t != mop_r)
 			return false;
 
@@ -783,7 +783,7 @@ std::set<minsn_t*> gather_reg2reg_movs_with_no_use_or_redef(mblock_t* blk) {
 		if (find_next_mreg_use(insn->next, insn->d.r, insn->d.size, &redef_d) || redef_d) {
 			continue;
 		}
-		
+
 		if (find_next_mreg_use(insn->next, insn->l.r, insn->l.size, &redef_d) || redef_d)
 			continue;
 
@@ -959,7 +959,7 @@ bool ldx_src_equals_stx_dest(minsn_t* ldx, minsn_t* sty) {
 	mreg_t segregx;
 	mop_t* basex;
 	mop_t* displx;
-	
+
 
 	if (!extract_ldx_displ(ldx, &segregx, &basex, &displx))
 		return false;
@@ -994,7 +994,7 @@ bool ldx_src_equals_stx_dest(minsn_t* ldx, minsn_t* sty) {
 
 bool minsn_has_any_tempreg(minsn_t* insn) {
 	bool result = false;
-	traverse_minsn< gen_use_traversal_traits>(insn, [&result](mop_t * mop) {
+	traverse_minsn< gen_use_traversal_traits>(insn, [&result](mop_t* mop) {
 		if (mop->t != mop_r)
 			return;
 		if (rlist_tempregs.has_any(mop->r, mop->size)) {
@@ -1035,7 +1035,7 @@ static bool gather_single_block_uses(fixed_size_vecptr_t<minsn_t*> uses, minsn_t
 
 	minsn_t* pos = start;
 	bool redefed = false;
-	
+
 	while ((pos = (prior ? find_prev_use : find_next_use)(blk, pos, list, &redefed)) && !redefed) {
 		if (!uses->push_back(pos)) {
 			return false;
@@ -1053,22 +1053,22 @@ struct usage_path_gatherer_tmpl_t {
 		returns false if we exceeded our fixed size array and need to terminate
 	*/
 	CS_NOINLINE
-	static bool gather_uses_in_path(fixed_size_vecptr_t<minsn_t*> uses,
-		/*
-			fixed size vector, intended to be reused
-			acts as a set of visited basic blocks
-		*/
-		T visited_pool,
-		mblock_t* blk,
-		mlist_t* list,
-		bool prior,
-		minsn_t* start = nullptr) {
+		static bool gather_uses_in_path(fixed_size_vecptr_t<minsn_t*> uses,
+			/*
+				fixed size vector, intended to be reused
+				acts as a set of visited basic blocks
+			*/
+			T visited_pool,
+			mblock_t* blk,
+			mlist_t* list,
+			bool prior,
+			minsn_t* start = nullptr) {
 
 		if (start)
 			if (!gather_single_block_uses(uses, start, blk, list, prior))
 				return true;
 
-		for (auto&& succ : prior ? blk->predset : blk->succset ) {
+		for (auto&& succ : prior ? blk->predset : blk->succset) {
 
 			if (visited_pool->has(succ)) {
 				continue;
@@ -1104,35 +1104,35 @@ bool gather_uses(fixed_size_vecptr_t<minsn_t*> uses,
 	mblock_t* blk,
 	mlist_t* list, bool prior) {
 	bool redefed = false;
-	
-	
+
+
 	/*if (!gather_single_block_uses(uses, start, blk, list))
 		return;
 
-	
+
 
 	if (!blk->succset.size())
 		return;*/
 
 
 
-	//gather_uses_in_path(uses, visited_pool, blk, list, start);
+		//gather_uses_in_path(uses, visited_pool, blk, list, start);
 
-	//visited_pool->reset();
+		//visited_pool->reset();
 
-	
+
 
 	mbl_array_t* mba = blk->mba;
 
 	if (mba->qty < 64) {
 		bitset64_t visited{};
 
-		return usage_gatherer_bblt64_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
+		return usage_gatherer_bblt64_t::gather_uses_in_path(uses, &visited, blk, list, prior, start);
 	}
 	else if (mba->qty < 128) {
 		bitset128_t visited{};
 
-		return usage_gatherer_bblt128_t::gather_uses_in_path(uses, &visited, blk, list, prior,start);
+		return usage_gatherer_bblt128_t::gather_uses_in_path(uses, &visited, blk, list, prior, start);
 	}
 	else {
 		visited_pool->clear();
@@ -1364,7 +1364,7 @@ bool gather_equal_valnums_in_block(mblock_t* blk, mop_t* mop, fixed_size_vecptr_
 	unsigned vnum = mop->valnum;
 	bool did_exceed = false;
 	for (minsn_t* head = blk->head; head; head = head->next) {
-		traverse_minsn<gen_use_traversal_traits>(head, [vnum, vec,&did_exceed](mop_t * mop) {
+		traverse_minsn<gen_use_traversal_traits>(head, [vnum, vec, &did_exceed](mop_t* mop) {
 			if (mop->valnum == vnum) {
 				if (!vec->push_back(mop)) {
 					did_exceed = true;
@@ -1384,7 +1384,7 @@ struct has_any_ldx_traits {
 };
 bool has_any_ldx(minsn_t* CS_RESTRICT insn) {
 	bool fug = false;
-	traverse_minsn< has_any_ldx_traits>(insn, [&fug](mop_t * mop) {
+	traverse_minsn< has_any_ldx_traits>(insn, [&fug](mop_t* mop) {
 		if (mop->t != mop_d)
 			return false;
 
@@ -1394,16 +1394,16 @@ bool has_any_ldx(minsn_t* CS_RESTRICT insn) {
 		}
 		return false;
 
-	});
+		});
 	return fug;
 }
 
 void replace_cc_flag_mops_with_other_mop(minsn_t* insn, mreg_t ccmr, mop_t* mop) {
 
-	traverse_minsn<gen_use_traversal_traits>(insn, [ccmr, mop](mop_t * repr) {
+	traverse_minsn<gen_use_traversal_traits>(insn, [ccmr, mop](mop_t* repr) {
 		if (repr->t == mop_r && repr->r == ccmr) {
 			*repr = *mop;
-			}
+		}
 		});
 
 }
@@ -1453,10 +1453,80 @@ mop_t* resolve_lvalue(mop_t* input) {
 	}
 	return nullptr;
 }
+
 mblock_t* resolve_goto_block(mblock_t* blk) {
 
 	if (blk && blk->tail && blk->tail->op() == m_goto && blk->tail->l.t == mop_b) {
 		return blk->mba->natural[blk->tail->l.b];
 	}
 	return blk;
+}
+struct preld_ldx_traits {
+	static constexpr unsigned AUXSTACK_SIZE = 64;
+	static constexpr bool maintain_context_ptrs = false;
+	static constexpr bool may_term_flow = false;
+};
+bool gather_inner_insns_by_opcode(mcode_t op, fixed_size_vecptr_t<mop_t*> into, minsn_t* target) {
+
+	traverse_minsn<preld_ldx_traits>(target, [into, op](mop_t* mop) {
+		if (mop->t == mop_d && mop->d->opcode == op) {
+			into->push_back(mop);
+		}
+		});
+	return true;
+}
+struct might_have_side_effects_traits {
+	static constexpr unsigned AUXSTACK_SIZE = 64;
+	static constexpr bool maintain_context_ptrs = false;
+	static constexpr bool may_term_flow = true;
+};
+bool minsn_might_have_side_effects(minsn_t* insn) {
+	bool result = false;
+	traverse_minsn<might_have_side_effects_traits>(insn, [&result](mop_t* mop) {
+		if (mop->t != mop_d)return false;
+
+		minsn_t* i = mop->d;
+
+		mcode_t op = i->op();
+
+		if (op == m_ldx || op == m_stx || op == m_call || op == m_icall || op == m_ext) {
+			result = true;
+			return true;
+		}
+		return false;
+		});
+	return result;
+}
+
+struct gather_or_chain_traits {
+	static constexpr unsigned AUXSTACK_SIZE = 512;
+	static constexpr bool maintain_context_ptrs = false;
+	static constexpr bool may_term_flow = true;
+};
+
+bool gather_setop_or_chain(fixed_size_vecptr_t<minsn_t*> into, minsn_t* from) {
+	
+	mcode_t op = from->op();
+
+	if (mcode_is_set(op)) {
+		if (!into->push_back(from)) {
+			return false;
+		}
+	}
+	else if (op == m_or) {
+		if (from->l.t != mop_d || from->r.t != mop_d) {
+			return false;
+		}
+
+		if (!gather_setop_or_chain(into, from->l.d) || !gather_setop_or_chain(into, from->r.d)) {
+			return false;
+		}
+
+	}
+	else {
+		return false;
+	}
+	return true;
+	
+	
 }

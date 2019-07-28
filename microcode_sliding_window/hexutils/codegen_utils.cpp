@@ -175,3 +175,58 @@ void insert_mov2_before(ea_t ea, mblock_t* blk, minsn_t* before, mop_t* from, mo
 	blk->insert_into_block(moveeboi, before);
 
 }
+
+void setup_ucomp_ulbound(minsn_t* into, mop_t* against, unsigned size, uint64_t lower, uint64_t upper, ea_t ea) {
+
+	minsn_t* lowboi = new minsn_t(ea),
+		* highboi = new minsn_t(ea);
+	lowboi->opcode = m_setae;
+	highboi->opcode = m_setbe;
+
+	lowboi->l = *against;
+	highboi->l = *against;
+	lowboi->r.make_number(lower, size, ea);
+	highboi->r.make_number(upper, size, ea);
+	lowboi->d.size = 1;
+	highboi->d.size = 1;
+
+	mop_t randop = mop_t::subinsn(lowboi, 1);
+
+	mop_t landop = mop_t::subinsn(highboi, 1);
+
+	setup_bitand(into, &landop, &randop);
+
+	into->ea = ea;
+
+	
+}
+void lnot_mop(mop_t* into, mop_t* operand, ea_t ea) {
+
+	minsn_t* ln = new minsn_t(ea);
+
+	ln->opcode = m_lnot;
+
+	ln->l = *operand;
+
+	ln->d.size = 1;
+	into->assign_insn(ln, 1);
+	
+}
+void setup_flagged_bool_select(minsn_t* into, mop_t* flag, mop_t* iftrue, mop_t* iffalse, ea_t ea) {
+
+	//(x & flag) | (y & !flag)
+	minsn_t* truesel = new minsn_t(ea);
+	setup_bitand(truesel, iftrue, flag);
+
+	mop_t lnotted{};
+	lnot_mop(&lnotted, flag, ea);
+	minsn_t* falsesel = new minsn_t(ea);
+
+	setup_bitand(falsesel, iffalse, &lnotted);
+	mop_t tr = mop_t::subinsn(truesel, 1);
+	mop_t fa = mop_t::subinsn(falsesel, 1);
+
+	setup_bitor(into, &tr, &fa);
+
+	into->ea = ea;
+}

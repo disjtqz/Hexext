@@ -43,3 +43,44 @@ void cs::_cs_assert_fail_raise(const cs_assert_fail_descr_t* descr) {
 	interr(66666);
 }
 #include "mixins/revert_codegen.mix"
+
+bool make_compare_interval_from_sorted_range(fixed_size_vecptr_t<u64_comp_interval_t> ivls, fixed_size_vecptr_t<uint64_t> outliers,
+	fixed_size_vecptr_t<uint64_t> input) {
+
+	
+
+	if (!input->size())
+		return true;
+	bool in_range = false;
+	uint64_t range_start = 0;
+
+	uint64_t previous = input->operator[](0);
+
+	for (unsigned i = 1; i < input->size(); ++i) {
+		uint64_t val = input->operator[](i);
+
+		if (in_range && val != (previous + 1)) {
+
+			u64_comp_interval_t intvs{};
+			intvs.low = range_start;
+			intvs.high = previous;
+			if (!ivls->push_back(intvs))
+				return false;
+			in_range = false;
+			
+		}
+		else if (!in_range && val != (previous + 1)) {
+
+			if (!outliers->push_back(previous))
+				return false;
+		}
+		else if (!in_range && val == (previous + 1)) {
+			in_range = true;
+			range_start = previous;
+		}
+		previous = val;
+	}
+
+	return true;
+
+}

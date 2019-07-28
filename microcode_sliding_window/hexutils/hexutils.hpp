@@ -418,5 +418,13 @@ mop_t* resolve_lvalue(mop_t* input);
 
 mblock_t* resolve_goto_block(mblock_t* blk);
 
+
+bool gather_inner_insns_by_opcode(mcode_t op, fixed_size_vecptr_t<mop_t*> into, minsn_t* target);
+
+
+bool minsn_might_have_side_effects(minsn_t* insn);
+//returns false if exceeded fixed size vector or if from does not form a valid setop or chain
+bool gather_setop_or_chain(fixed_size_vecptr_t<minsn_t*> into, minsn_t* from);
+
 #include "codegen_utils.hpp"
 #include "micro_executor_template.hpp"

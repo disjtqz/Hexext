@@ -225,6 +225,12 @@
     <ClCompile Include="preoptimization-postprocess\prepostprocess.cpp">
       <Filter>Source Files\preoptimization-postprocess</Filter>
     </ClCompile>
+    <ClCompile Include="hexmod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\memory_oper_rules.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="micro_on_70.hpp">
@@ -463,6 +469,9 @@
     </ClInclude>
     <ClInclude Include="hexutils\micropool.hpp">
       <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\memory_oper_rules.hpp">
+      <Filter>Header Files\combine_rules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
