@@ -102,7 +102,7 @@ bool xor_to_or_t::run_combine(mcombine_t* state) {
 	potential_valbits_t bitsr = try_compute_opnd_potential_valbits(&insn->l);
 
 	if (!(bitsl.value() & bitsr.value())) {
-	//	msg("%x", state->block()->flags);
+
 		insn->opcode = m_or;
 		return true;
 	}

@@ -476,8 +476,8 @@ minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn,
 
 minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed) {
 	minsn_t* curr = insn->next;
-	mlist_t l{};
-	mlist_t def{};
+	mlist_t l;
+	mlist_t def;
 	if (redefed)
 		* redefed = false;
 	for (; curr; curr = curr->next) {

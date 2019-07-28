@@ -203,6 +203,8 @@ COMB_RULE_IMPLEMENT(interblock_jcc_deps_combiner) {
 	for (unsigned cc = mr_cf; cc < mr_pf + 1; ++cc) {
 		if (!lst.reg.has(cc))
 			continue;
+
+		
 		/*
 			gather single definition for flag
 		*/
@@ -210,6 +212,9 @@ COMB_RULE_IMPLEMENT(interblock_jcc_deps_combiner) {
 
 		mlist_t lst_flag{};
 		lst_flag.reg.add(cc);
+		if (find_definition_backwards(blk, i, &lst_flag) != nullptr) {
+			continue;
+		}
 		if (!gather_defs(definitions.pass(), state->bbidx_pool(), blk, &lst_flag) || definitions.size() != 1) {
 			continue;
 		}
@@ -386,7 +391,9 @@ Block 2 - 180008b43 to 180008b4b. Flags = 48.
 Block 3 - 180008b4b to 180008b4f. Flags = 48.
 */
 COMB_RULE_IMPLEMENT(distribute_constant_sub_in_const_comp) {
-
+#if 0
+	return false;
+#endif
 	auto i = state->insn();
 
 	if (!mcode_is_set(i->op()) && !mcode_is_jcc(i->op()))
@@ -397,7 +404,7 @@ COMB_RULE_IMPLEMENT(distribute_constant_sub_in_const_comp) {
 	if (!inner_insn)
 		return false;
 
-
+#if 1
 	auto [subtractor, innersubconst, innersubterm] = inner_insn->descend_to_binary_insn(m_sub, mop_n);
 
 	if (!subtractor)
@@ -407,18 +414,42 @@ COMB_RULE_IMPLEMENT(distribute_constant_sub_in_const_comp) {
 	if (innersubconst != &subtractor->r)
 		return false;
 	uint64_t comp;
-	const_term->is_constant(&comp, false);
+	const_term->is_constant(&comp, true);
 	uint64_t bound;
-	innersubconst->is_constant(&bound, false);
+	innersubconst->is_constant(&bound, true);
 
 	const_term->nnn->update_value(bound + comp);
 
-	mop_t tempboi{ std::move(*innersubterm) };
+	mop_t tempboi = *innersubterm;
 
-	*inner_insn = std::move(tempboi);
+	*inner_insn = tempboi;
 
 	return true;
+#else
 
+	bool is_sub = inner_insn->d->op() == m_sub;
+	if (!is_sub && inner_insn->d->op() != m_add)
+		return false;
+	auto [subtractor, innersubconst, innersubterm] = inner_insn->descend_to_binary_insn(is_sub ? m_sub : m_add, mop_n);
+
+	
+	if (!subtractor)return false;
+
+	if (innersubconst != &subtractor->r)
+		return false;
+	uint64_t comp;
+	const_term->is_constant(&comp, true);
+	uint64_t bound;
+	innersubconst->is_constant(&bound, true);
+
+	const_term->nnn->update_value(is_sub ? comp + -(int64_t)bound : comp - bound);
+
+	mop_t tempboi = *innersubterm;
+
+	*inner_insn = tempboi;
+
+	return true;
+#endif
 }
 /*
 16317c : mov #0.4, . - 1, R0.4
@@ -440,24 +471,10 @@ COMB_RULE_IMPLEMENT(replace_boolean_flow_with_boolean_logic) {
 
 	if (insn->opcode != m_mov || !insn->l.is_equal_to(0, false))
 		return false;
-
-	mlist_t dest{};
 	auto blk = state->block();
-
-	add_mop_to_mlist(&insn->d, &dest, &blk->mba->vars);
-	bool redefed = false;
-
-	if (find_next_use(blk, insn, &dest, &redefed))
-		return false;
-
-	if (redefed)
-		return false;
-
 	auto blkend = blk->tail;
-
 	if (!mcode_is_jcc(blkend->op()))
 		return false;
-
 	auto fallthrough_block = blk->nextb;
 	if (!fallthrough_block)
 		return false;
@@ -469,6 +486,17 @@ COMB_RULE_IMPLEMENT(replace_boolean_flow_with_boolean_logic) {
 
 	auto fallthroughop = fallthrough_block->head;
 	if (fallthroughop->op() != m_mov || !fallthroughop->d.lvalue_equal(&insn->d) || !fallthroughop->l.is_equal_to(1ULL, false))
+		return false;
+	mlist_t dest{};
+
+
+	add_mop_to_mlist(&insn->d, &dest, &blk->mba->vars);
+	bool redefed = false;
+
+	if (find_next_use(blk, insn, &dest, &redefed))
+		return false;
+
+	if (redefed)
 		return false;
 
 	auto fallthrough2 = fallthrough_block->nextb;
@@ -521,6 +549,8 @@ COMB_RULE_IMPLEMENT(replace_boolean_flow_with_boolean_logic) {
 	}
 	minsn_t* newtail = new minsn_t(blkend->ea);
 
+	blk->flags |= MBL_INCONST;
+	fallthrough_block->flags |= MBL_INCONST;
 	newtail->opcode = m_goto;
 
 	newtail->l.make_blkref(fallthrough2->serial);
@@ -877,6 +907,7 @@ COMB_RULE_IMPLEMENT(interblock_flagop_merger) {
 		fi->make_nop();
 	fallthrough->flags |= MBL_INCONST;
 
+	blk->flags |= MBL_INCONST;
 
 	blk->type = BLT_1WAY;
 

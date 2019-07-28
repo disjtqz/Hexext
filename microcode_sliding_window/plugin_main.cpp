@@ -85,10 +85,11 @@ int idaapi init(void)
 #endif
 #if 0
 		hexext::install_glbopt_cb(dump_the_patterns);
+		cs_assert(init_hexmod(g_currarch == hexext_arch_e::ARM));
 #endif
 		msg("Hexext is loaded! Use Ctrl-2 to toggle optimizations on and off!\n");
 		
-		cs_assert(init_hexmod(g_currarch == hexext_arch_e::ARM));
+
 
 		
 		return PLUGIN_KEEP;

@@ -197,6 +197,7 @@ public:
 
 	~bitset_t(void)
 	{
+		if(bitmap)
 		qfree(bitmap);
 		bitmap = NULL;
 	}
@@ -301,7 +302,7 @@ struct mlist_t {
 
 	rlist_t reg;
 	ivlset_t mem;
-
+	mlist_t() : reg(), mem() {}
 };
 
 

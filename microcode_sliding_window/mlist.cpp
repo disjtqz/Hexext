@@ -25,8 +25,10 @@ void  bitset_t::resize( int a2)
 	if (a2 >= (signed int)this->high)
 	{
 		v3 = (a2 + 32) & 0xFFFFFFE0;
-		v4 = (unsigned int*)qrealloc(this->bitmap, v3 / 8);
-		
+		if(bitmap)
+			v4 = (unsigned int*)qrealloc(this->bitmap, v3 / 8);
+		else 
+			v4 = (unsigned int*)qalloc( v3 / 8);
 		memset(&v4[(signed int)v2->high / 32], 0, (signed int)(v3 - v2->high) / 8);
 		v2->bitmap = (mbitmap_t*)v4;
 		v2->high = v3;
