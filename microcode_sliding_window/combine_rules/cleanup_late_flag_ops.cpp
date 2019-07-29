@@ -596,11 +596,11 @@ COMB_RULE_IMPLEMENT(merge_short_circuit_or_with_no_side_effects) {
 		return false;
 
 	
-	if (fallthrough->type != BLT_2WAY)
-		return false;
+	//if (fallthrough->type != BLT_2WAY)
+	//	return false;
 
 	minsn_t* fallthroughop = fallthrough->head;
-
+	if (!fallthroughop)return false;
 	if (fallthroughop != fallthrough->tail)
 		return false;
 
@@ -775,7 +775,7 @@ COMB_RULE_IMPLEMENT(merge_multi_setz_chain_interval) {
 		}
 
 		for (auto&& outlier : outliers) {
-			minsn_t* outlop = new minsn_t();
+			minsn_t* outlop = new minsn_t(insn->ea);
 			mop_t numop{};
 			numop.make_number(outlier, mrop.size, insn->ea);
 			setup_subinsn_setcc_of_size(outlop, m_setz, mrop.size, &mrop, &numop);
@@ -821,8 +821,7 @@ COMB_RULE_IMPLEMENT(interblock_flagop_merger) {
 	if (!fallthrough)
 		return false;
 	
-	if (!fallthrough->nextb || fallthrough->type != BLT_1WAY ||fallthrough->nextb != blk->mba->natural[insn->d.b] ||
-		fallthrough->predset.size() != 1)
+	if (!fallthrough->nextb || fallthrough->type != BLT_1WAY ||fallthrough->nextb != blk->mba->natural[insn->d.b])
 		return false;
 	mlist_t fidefs{};
 	mlist_t fiuse{};
@@ -900,12 +899,13 @@ COMB_RULE_IMPLEMENT(interblock_flagop_merger) {
 
 	blk->succset.del(fallthrough->serial);
 
+	if (fallthrough->predset.size() == 1) {
+
+		for (auto fi = fallthrough->head; fi; fi = fi->next)
+			fi->make_nop();
+		fallthrough->flags |= MBL_INCONST;
+	}
 	fallthrough->predset.del(blk->serial);
-
-
-	for (auto fi = fallthrough->head; fi; fi = fi->next)
-		fi->make_nop();
-	fallthrough->flags |= MBL_INCONST;
 
 	blk->flags |= MBL_INCONST;
 
