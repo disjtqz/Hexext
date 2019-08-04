@@ -35,15 +35,10 @@ hexext_arch_e hexext::currarch() {
 	return g_currarch;
 
 }
+
 class scanspoil_handler_t : public action_handler_t {
 
 	virtual int idaapi activate(action_activation_ctx_t* ctx) {
-
-		/*auto mba = hexext::gen_microcode_ex(get_screen_ea(), hexext_micromat_e::preopt);
-		msg("I have stinky one.\n");
-
-		release_dup_mba((dup_mbl_array_t*)mba);*/
-
 		func_t* ffunc = get_next_func(0);
 		std::vector<mbl_array_t*> allfuncs{};
 
@@ -58,6 +53,7 @@ class scanspoil_handler_t : public action_handler_t {
 		return AST_ENABLE;
 	}
 };
+
 static scanspoil_handler_t scanspoil{};
 static action_desc_t dadescr{ sizeof(action_desc_t), "hexext.scanspoil", "Scan spoiled lists", &scanspoil, nullptr, "Ctrl-7", "", 0,0 };
 constexpr uintptr_t the_offs = 0x73518AE0ull - 0x732B0000ull;

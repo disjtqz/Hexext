@@ -1,6 +1,9 @@
 
 #include "combine_rule_defs.hpp"
 #include "bnot_and_low.hpp"
+
+
+
 /*
 and (bnot (low (shr (ldx ds.2, (add rcx.8, #4.8).8).4, #4.1).4, .-1).1, .-1).1, #1.1, rax.1
 
@@ -10,7 +13,12 @@ and (bnot (low (shr (ldx ds.2, (add rcx.8, #4.8).8).4, #4.1).4, .-1).1, .-1).1, 
  Take (~(x) & 1) and turn it into (x) & 1 == 0
  GCC likes to generate conditionals like these on ARM32 and x86-64
 */
-static bool combine_bnot_and_1_impl(mblock_t* blk, minsn_t* insn_) {
+COMB_RULE_IMPLEMENT(combine_bnot_and_one){
+
+	mblock_t* blk = state->block(); 
+	
+	minsn_t* insn_ = state->insn();
+
 	if (insn_->op() != m_and)
 		return false;
 
@@ -37,12 +45,16 @@ static bool combine_bnot_and_1_impl(mblock_t* blk, minsn_t* insn_) {
 		insn_->d = dstguy;
 	}
 	return true;
-
-
-	
 }
+
+
+
 //jnz (and (bnot (low (shr rsi.4, #3.1).4, .-1).1, .-1).1, #1.1).1, #0.1, 2
-static bool combine_jzf_and_bnot_impl(mblock_t* blk, minsn_t* insn) {
+
+COMB_RULE_IMPLEMENT(combine_jzf_and_bnot){
+	mblock_t* blk = state->block();
+
+	minsn_t* insn = state->insn();
 
 	mcode_t op = insn->opcode;
 
@@ -86,29 +98,6 @@ static bool combine_jzf_and_bnot_impl(mblock_t* blk, minsn_t* insn) {
 	delete old_bnot;
 
 	return true;
-
-	
-
-
-
 }
 
-bool combine_bnot_and_one_t::run_combine(mcombine_t* state){
-	return combine_bnot_and_1_impl(state->block(), state->insn());
-}
 
-const char* combine_bnot_and_one_t::name() const {
-	return "Combine bitnot AND pow2";
-}
-
-combine_bnot_and_one_t combine_bnot_and_one{};
-
-bool combine_jzf_and_bnot_t::run_combine(mcombine_t* state) {
-	return combine_jzf_and_bnot_impl(state->block(), state->insn());
-}
-
-const char* combine_jzf_and_bnot_t::name() const {
-	return "Combine jzf bittest with bitnot";
-}
-
-combine_jzf_and_bnot_t combine_jzf_and_bnot{};
