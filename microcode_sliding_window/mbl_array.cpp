@@ -312,3 +312,124 @@ minsn_t* __fastcall mblock_t::remove_from_block(minsn_t* m)
 	 result->minbstkref = minstkref;
 	 return result;
  }
+ mblock_t* dup_mblock(mblock_t* other) {
+	 /*
+	 	void* vtable;
+	mblock_t* nextb;
+	mblock_t* prevb;
+	int flags;
+	_BYTE gap_1C[4];
+	_QWORD field_20;
+	_QWORD field_28;
+	_QWORD field_30;
+	ea_t start;
+	ea_t end;
+	minsn_t* head;
+	minsn_t* tail;
+	_QWORD field_58;
+	_DWORD field_60;
+	_BYTE gap_64[4];
+	_QWORD field_68;
+	_QWORD field_70;
+	_QWORD field_78;
+	mlist_t mustbuse;
+	mlist_t maybuse;
+	mlist_t mustbdef;
+	mlist_t maybdef;
+	_QWORD field_120;
+	_DWORD field_128;
+	_BYTE gap_12C[4];
+	int serial;
+	_BYTE gap_134[4];
+	mbl_array_t* mba;
+	_DWORD type;
+	_BYTE gap_144[4];
+	_QWORD maxbsp;
+	_QWORD minbstkref;
+	_QWORD minbargref;
+	qvector<int> predset;
+	qvector<int> succset;
+	 */
+	 mblock_t* result = new mblock_t;
+	 memset(result, 0, sizeof(mblock_t));
+	 result->vtable = other->vtable;
+	 result->flags = other->flags;
+	 result->start = other->start;
+	 result->end = other->end;
+
+
+	 for (auto i = other->head; i; i = i->next) {
+		 result->insert_into_block(new minsn_t(*i), result->tail);
+	 }
+	 result->serial = other->serial;
+	 result->mustbuse.mem.copy(&other->mustbuse.mem);
+
+	 result->maybuse.mem.copy(&other->maybuse.mem);
+	 result->mustbdef.mem.copy(&other->mustbdef.mem);
+	 result->maybdef.mem.copy(&other->maybdef.mem);
+
+	 result->mustbuse.reg.copy(&other->mustbuse.reg);
+
+	 result->maybuse.reg.copy(&other->maybuse.reg);
+	 result->mustbdef.reg.copy(&other->mustbdef.reg);
+	 result->maybdef.reg.copy(&other->maybdef.reg);
+
+	 /*
+	 _QWORD maxbsp;
+	_QWORD minbstkref;
+	_QWORD minbargref;
+	qvector<int> predset;
+	qvector<int> succset;
+	 */
+	 result->maxbsp = other->maxbsp;
+	 result->minbstkref = other->minbstkref;
+	 result->minbargref = other->minbargref;
+	 result->predset = other->predset;
+	 result->succset = other->succset;
+	 result->type = other->type;
+	 return result;
+ }
+
+ void release_dup_mblock(mblock_t* block) {
+	 while (block->head) {
+		 minsn_t* torel = block->head;
+		 block->remove_from_block(block->head);
+		 delete torel;
+	 }
+	 block->mustbuse.~mlist_t();
+	 block->maybuse.~mlist_t();
+	 block->mustbdef.~mlist_t();
+	 block->maybdef.~mlist_t();
+	 block->predset.~qvector();
+	 block->succset.~qvector();
+	 delete block;
+ }
+ dup_mbl_array_t* dup_mba(mbl_array_t* mba) {
+
+	 mbl_array_t* result = new mbl_array_t;
+
+	 memset(result, 0, sizeof(mbl_array_t));
+
+	 result->natural = (mblock_t**) qalloc(sizeof(mblock_t*) * mba->qty);
+	 result->qty = mba->qty;
+	 result->flags1 = mba->flags1;
+	 for (unsigned i = 0; i < result->qty; ++i) {
+		 result->natural[i] = dup_mblock(mba->natural[i]);
+		 result->natural[i]->mba = result;
+		 if (i != 0) {
+			 result->natural[i - 1]->nextb = result->natural[i];
+			 result->natural[i]->prevb = result->natural[i - 1];
+		 }
+	 }
+
+	 result->blocks = result->natural[0];
+	 return (dup_mbl_array_t * )result;
+ }
+
+ void release_dup_mba(dup_mbl_array_t* mba) {
+	 for (unsigned i = 0; i < mba->qty; ++i) {
+		 release_dup_mblock(mba->natural[i]);
+	 }
+	 qfree(mba->natural);
+	 delete mba;
+ }

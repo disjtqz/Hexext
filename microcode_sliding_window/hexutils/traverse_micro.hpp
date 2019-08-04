@@ -66,7 +66,11 @@ enum traversal_exflags_e : uint64_t {
 	EXFLAGS_TRACK_PARENTINSN = 1,
 
 };
+#ifndef NDEBUG
 #define MICRO_INLINE		inline
+#else
+#define MICRO_INLINE		CS_FORCEINLINE
+#endif
 template<typename traversal_traits, uint64_t exflags = 0,typename TParam = void, typename TCallable = void>
 static MICRO_INLINE void traverse_micro(TParam* parm, TCallable&& callable) {
 	constexpr unsigned AUXSTACK_SIZE = traversal_traits::AUXSTACK_SIZE;

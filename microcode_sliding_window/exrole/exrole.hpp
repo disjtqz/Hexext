@@ -70,6 +70,19 @@ static inline exrole_call_binary_t extract_binary_exrole(minsn_t* insn, exrole_t
 	return { &insn->d.f->args[0], &insn->d.f->args[1] };
 
 }
+
+static inline mop_t* extract_unary_exrole(minsn_t* insn, exrole_t role) {
+
+	exrole_t r = get_instruction_exrole(insn);
+
+	if (r != role) {
+		return  nullptr;
+	}
+	cs_assert(insn->d.f->args.size() == 1);
+
+	return &insn->d.f->args[0];
+
+}
 /*
 	finds the extended role for a call to a helper function and tags the instruction with the corresponding role
 */

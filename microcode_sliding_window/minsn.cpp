@@ -176,3 +176,25 @@ minsn_t* new_helper(
 
 	return callins;
 }
+CS_NOINLINE
+void minsn_t::make_nop() {
+	opcode = m_nop;
+	d.erase();
+	l.erase();
+	r.erase();
+}
+
+CS_NOINLINE
+minsn_t::minsn_t(ea_t _ea ) { init(_ea); }
+
+CS_NOINLINE
+minsn_t::minsn_t(const minsn_t& m) { next = prev = NULL; copy(m); }
+
+CS_NOINLINE
+void hexapi minsn_t::init(ea_t _ea) {
+	this->ea = _ea;
+	this->next = nullptr;
+	this->prev = nullptr;
+	this->opcode = (mcode_t)0;
+	this->iprops = 0;
+}

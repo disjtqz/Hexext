@@ -20,3 +20,5 @@ public:
 
 extern combine_x86_band_high_t combine_x86_band_high;
 extern combine_x86_bitor_high_t combine_x86_bitor_high;
+
+COMB_RULE_DECL(highbyte_used_with_lowbyte, "Convert highbyte to bitwise extraction if used with lowbyte in same operation");

@@ -230,3 +230,30 @@ void setup_flagged_bool_select(minsn_t* into, mop_t* flag, mop_t* iftrue, mop_t*
 
 	into->ea = ea;
 }
+
+
+minsn_t* new_helper_late(
+	minsn_t* callins,
+	const char* helper_name,
+	unsigned res_size,
+	unsigned nargs,
+	mcallarg_t* args,
+	tinfo_t* return_type,
+	mop_t* retloc) {
+
+	mlist_t retregs{};
+	mlist_t spoiled{};
+	spoiled.mem.qclear();
+
+
+	for (unsigned i = 0; i < nargs; ++i) {
+		args[i].ea = BADADDR;
+	}
+	argloc_t retreg;
+	cs_assert(retloc->is_lvalue() && retloc->t != mop_l);
+	lvalue_mop_to_argloc(nullptr, &retreg, retloc);
+
+	new_helper(callins, helper_name, res_size, nargs, args, return_type, &retreg, &retregs.reg, &spoiled, 1, retloc);
+	callins->d.f->flags |= FCI_PROP;
+	return callins;
+}

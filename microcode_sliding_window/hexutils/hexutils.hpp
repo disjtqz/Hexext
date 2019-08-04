@@ -139,9 +139,14 @@ struct potential_valbits_t {
 	unsigned npossible() const {
 		return __popcnt64(m_underlying);
 	}
-};
 
+	void set_all() {
+		m_underlying = ~0ULL;
+	}
+};
+potential_valbits_t try_compute_insn_potential_valbits(minsn_t* insn);
 potential_valbits_t try_compute_opnd_potential_valbits(mop_t* op);
+
 
 static inline std::pair<potential_valbits_t, potential_valbits_t> try_compute_lr_potential_valbits(minsn_t* insn) {
 	return { try_compute_opnd_potential_valbits(&insn->l) , try_compute_opnd_potential_valbits(&insn->r) };
@@ -259,6 +264,7 @@ bool gather_user_subinstructions(lvars_t* lvars, minsn_t* insn, mlist_t* CS_REST
 minsn_t* find_definition_backwards(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn, mlist_t* CS_RESTRICT mlist);
 
 minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn, mlist_t* CS_RESTRICT mlist);
+minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed, minsn_t** redefptr);
 minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed);
 minsn_t* find_prev_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* defed);
 bool find_definition_size(bitset_t* visited_pool,  mblock_t* block, minsn_t* insn, unsigned* size_out, mop_t* mreg);
@@ -425,6 +431,9 @@ bool gather_inner_insns_by_opcode(mcode_t op, fixed_size_vecptr_t<mop_t*> into, 
 bool minsn_might_have_side_effects(minsn_t* insn);
 //returns false if exceeded fixed size vector or if from does not form a valid setop or chain
 bool gather_setop_or_chain(fixed_size_vecptr_t<minsn_t*> into, minsn_t* from);
+
+
+
 
 #include "codegen_utils.hpp"
 #include "micro_executor_template.hpp"

@@ -231,6 +231,12 @@
     <ClCompile Include="combine_rules\memory_oper_rules.cpp">
       <Filter>Source Files\combine_rules</Filter>
     </ClCompile>
+    <ClCompile Include="combine_rules\bitlogic_misc.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
+    <ClCompile Include="combine_rules\popcnt_recognizers.cpp">
+      <Filter>Source Files\combine_rules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="micro_on_70.hpp">
@@ -471,6 +477,15 @@
       <Filter>Header Files\hexutils</Filter>
     </ClInclude>
     <ClInclude Include="combine_rules\memory_oper_rules.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="hexutils\moptrace.hpp">
+      <Filter>Header Files\hexutils</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\bitlogic_misc.hpp">
+      <Filter>Header Files\combine_rules</Filter>
+    </ClInclude>
+    <ClInclude Include="combine_rules\popcnt_recognizers.hpp">
       <Filter>Header Files\combine_rules</Filter>
     </ClInclude>
   </ItemGroup>

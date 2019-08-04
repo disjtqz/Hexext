@@ -22,7 +22,19 @@ static struct {
 
 }g_microgen_state_flags;
 
+static hexext_micromat_e g_reqmat = hexext_micromat_e::none;
+static mbl_array_t* g_reqmat_output_mba = nullptr;
 
+
+static bool test_at_reqmat(hexext_micromat_e mat, mbl_array_t* mba) {
+	if (g_reqmat == hexext_micromat_e::none)
+		return false;
+	if (g_reqmat == mat) {
+		g_reqmat_output_mba = (mbl_array_t*)dup_mba(mba);
+		return true;
+	}
+	return false;
+}
 bool hexext::ran_glbopt() {
 	return g_microgen_state_flags.did_run_glbopt;
 }
@@ -98,6 +110,11 @@ static int dispatch_glbopt(mbl_array_t* mba) {
 	if (did_modify) {
 		return MERR_LOOP;
 	}
+
+	if (test_at_reqmat(hexext_micromat_e::glbopt, mba)) {
+		return MERR_CANCELED;
+	}
+
 
 
 	return MERR_OK;
@@ -313,6 +330,9 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 		for (auto&& cb : g_locopt_cbs) {
 			cb(mba);
 		}
+		if (test_at_reqmat(hexext_micromat_e::locopt, mba)) {
+			return MERR_CANCELED;
+		}
 		return 0;
 	}
 	else if (event == hxe_preoptimized) {
@@ -346,8 +366,11 @@ static int idaapi hexcb(void* ud, hexrays_event_t event, va_list va) {
 				blk->flags &= ~MBL_LIST;
 			}
 			//havent checked yet to see if preoptimization honors MERR_LOOP. rerunning preoptimization probably wont have many benefits anyway
-			//return MERR_LOOP;
-			return 0;//lets not slow decompilation the fuck down 
+			
+		}
+
+		if (test_at_reqmat(hexext_micromat_e::preopt, mba)) {
+			return MERR_CANCELED;
 		}
 		return 0;
 
@@ -460,4 +483,17 @@ int hexext::microgen_decode_insn(insn_t* insn, ea_t ea) {
 ea_t hexext::microgen_decode_prev_insn(insn_t* insn, ea_t ea) {
 	return g_filter_api._microgen_decode_prev_insn(insn, ea);
 }
+
+mbl_array_t* hexext::gen_microcode_ex(ea_t ea, hexext_micromat_e mat, micropass_t* pass) {
+	g_reqmat_output_mba = nullptr;
+	g_reqmat = mat;
+	hexrays_failure_t fail{};
+	decompile(get_func(ea), &fail);
+	mbl_array_t* result = g_reqmat_output_mba;
+	g_reqmat_output_mba = nullptr;
+	g_reqmat = hexext_micromat_e::none;
+	return result;
+
+}
+
 #include "mixins/revert_codegen.mix"

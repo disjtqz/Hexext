@@ -174,7 +174,11 @@ public:
 	ivlset_t* copy(const ivlset_t* rhs);
 
 	
+	void sub(ivlset_t* other) {
+		for (auto&& iv : other->bag) {
 
+		}
+	}
 
 	DEFINE_MEMORY_ALLOCATION_FUNCS()
 };
@@ -303,6 +307,11 @@ struct mlist_t {
 	rlist_t reg;
 	ivlset_t mem;
 	mlist_t() : reg(), mem() {}
+	CS_NOINLINE ~mlist_t();
+	void clear() {
+		reg.clear();
+		mem.clear();
+	}
 };
 
 
@@ -490,58 +499,17 @@ public:
 		descend_to_binary_insn(mcode_t opcode, bool (*firstop_type)(mcode_t));
 	inline minsn_bin_descend_t
 		descend_to_binary_insn(mcode_t opcode, mopt_t firstop_type, mopt_t secondop_type);
-
-	bool lvalue_equal_ignore_size(mop_t* mop) {
-		if (!is_lvalue())
-			return false;
-
-		if (t != mop->t)
-			return false;
-
-		if (t == mop_r)
-			return r == mop->r;
-		else if (t == mop_S) {
-			return s->off == mop->s->off;
-		}
-		else if (t == mop_v) {
-			return g == mop->g;
-		}
-		else if (t == mop_l) {
-			return l->idx == mop->l->idx;
-		}
-		else
-			return false;
-	}
-
-	bool lvalue_equal(mop_t* mop) {
-		if (!is_lvalue())
-			return false;
-
-		if (t != mop->t)
-			return false;
-
-		if (size != mop->size)
-			return false;
-		if (t == mop_r)
-			return r == mop->r;
-		else if (t == mop_S) {
-			return s->off == mop->s->off;
-		}
-		else if (t == mop_v) {
-			return g == mop->g;
-		}
-		else if (t == mop_l) {
-			return l->idx == mop->l->idx;
-		}
-		else
-			return false;
-	}
+	CS_NOINLINE
+		bool lvalue_equal_ignore_size(mop_t* mop);
+	CS_NOINLINE
+	bool lvalue_equal(mop_t* mop);
 	void hexapi swap(mop_t& rop);
 	void hexapi erase(void);
 
 	mop_t(void) { zero(); }
 	mop_t(const mop_t& rop) { copy(rop); }
 	mop_t(mreg_t _r, int _s) : t(mop_r), oprops(0), valnum(0), size(_s), r(_r) {}
+
 	mop_t& operator=(const mop_t& rop) { return assign(rop); }
 	~mop_t(void)
 	{
@@ -907,7 +875,7 @@ struct minsn_t {
 	}
 
 
-	inline minsn_t(minsn_t&& other) : l(std::move(other.l)), r(std::move(other.r)), d(std::move(other.d)) {
+	inline minsn_t(minsn_t&& other) noexcept : l(std::move(other.l)), r(std::move(other.r)), d(std::move(other.d)) {
 		opcode = other.opcode;
 		iprops = other.iprops;
 		next = other.next;
@@ -920,7 +888,7 @@ struct minsn_t {
 
 	}
 
-	inline minsn_t& operator =(minsn_t&& other) {
+	inline minsn_t& operator =(minsn_t&& other) noexcept {
 		opcode = other.opcode;
 		iprops = other.iprops;
 		next = other.next;
@@ -939,14 +907,8 @@ struct minsn_t {
 	bool lr_both_size(unsigned sz) {
 		return l.size == sz && r.size == sz;
 	}
-
-	void hexapi init(ea_t _ea) {
-		this->ea = _ea;
-		this->next = nullptr;
-		this->prev = nullptr;
-		this->opcode =(mcode_t) 0;
-		this->iprops = 0;
-	}
+	CS_NOINLINE
+	void hexapi init(ea_t _ea);
 	void hexapi copy(const minsn_t& m);
 
 
@@ -954,12 +916,7 @@ struct minsn_t {
 		return l.t == ty || r.t == ty;
 	}
 
-	void make_nop() {
-		opcode = m_nop;
-		d.erase();
-		l.erase();
-		r.erase();
-	}
+	CS_NOINLINE void make_nop();
 
 	mop_t* __fastcall find_num_op(mop_t** other);
 	bool is_like_move() const {
@@ -1034,7 +991,9 @@ struct minsn_t {
 	bool both(mopt_t ty) {
 		return l.t == ty && r.t == ty;
 	}
-
+	bool both_lvalue() {
+		return l.is_lvalue() && r.is_lvalue();
+	}
 	mop_t* get_eitherlr(mopt_t ty, mop_t** out_non) {
 
 		if (r.t == ty) {
@@ -1092,8 +1051,8 @@ struct minsn_t {
 
 	
   /// Constructor
-	minsn_t(ea_t _ea = BADADDR) { init(_ea); }
-	minsn_t(const minsn_t& m) { next = prev = NULL; copy(m); }
+	CS_NOINLINE minsn_t(ea_t _ea = BADADDR);
+	CS_NOINLINE minsn_t(const minsn_t& m);
 	DEFINE_MEMORY_ALLOCATION_FUNCS();
 
 		/// Assignment operator. It does not copy prev/next fields.
@@ -1932,7 +1891,33 @@ enum class hexext_arch_e {
 	x86,
 	ARM
 };
+
+enum hexext_micromat_e {
+	preopt,
+	locopt,
+	glbopt,
+	none
+};
+/*
+	this should be passed to gen_microcode_ex. provides pass specific filters and rewriters for the generation phase,
+	custom combination rules yadda yadda.
+*/
+class micropass_t {
+
+};
+
+struct dup_mbl_array_t : public mbl_array_t {
+
+};
+
+dup_mbl_array_t* dup_mba(mbl_array_t* mba);
+
+void release_dup_mba(dup_mbl_array_t* mba);
+mblock_t* dup_mblock(mblock_t* block);
+void release_dup_mblock(mblock_t* block);
+
 namespace hexext {
+
 	CS_COLD_CODE
 	void install_glbopt_cb(glbopt_cb_t cb);
 	CS_COLD_CODE
@@ -1953,6 +1938,7 @@ namespace hexext {
 	void install_asm_rewriter(asmrewrite_cb_t cb);
 	CS_COLD_CODE
 	void remove_asm_rewriter(asmrewrite_cb_t cb);
+
 	CS_COLD_CODE
 	void install_asm_rewriter(asmrewrite_cb_t cb, bool enabled);
 
@@ -1971,6 +1957,8 @@ namespace hexext {
 	bool ran_preopt();
 	bool ran_locopt();
 	bool ran_glbopt();
+
+	mbl_array_t* gen_microcode_ex(ea_t ea, hexext_micromat_e mat, micropass_t* pass = nullptr);
 }
 
 #include <string>

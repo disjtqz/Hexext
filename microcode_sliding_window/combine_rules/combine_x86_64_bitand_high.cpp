@@ -132,3 +132,84 @@ const char* combine_x86_bitor_high_t::name() const {
 
 combine_x86_bitor_high_t combine_x86_bitor_high{};
 combine_x86_band_high_t combine_x86_band_high{};
+
+COMB_RULE_IMPLEMENT(highbyte_used_with_lowbyte) {
+	auto i = state->insn();
+	if (!hexext::ran_locopt())
+		return false;
+	if (!is_mcode_commutative(i->op()) || i->d.size != 1)
+		return false;
+#define		THEFLAG		(-1)
+	auto [rreg, lreg] = i->arrange_by(mop_r, mop_r);
+	if (!rreg)return false;
+	mop_t* highbyte_term = nullptr;
+	mop_t* nonhighbyte_term = nullptr;
+	if (mreg_has_highbyte_x86(rreg->r-1)) {
+		highbyte_term = rreg;
+		nonhighbyte_term = lreg;
+	}
+	else if (mreg_has_highbyte_x86(lreg->r-1)) {
+		highbyte_term = lreg;
+		nonhighbyte_term = rreg;
+	}
+	else {
+		return false;
+	}
+	if (highbyte_term->r - 1 != nonhighbyte_term->r)
+		return false;
+	unsigned sz=1;
+	if (!find_definition_size(state->bbidx_pool(), state->block(), hexext::current_topinsn(), &sz, nonhighbyte_term) || sz < 2)
+		return false;
+	sz = 2;
+
+	minsn_t* shrguy = new minsn_t(i->ea);
+
+	shrguy->opcode = m_shr;
+
+	shrguy->l = *nonhighbyte_term;
+
+	shrguy->l.size = sz;
+
+	shrguy->r.make_number(8, 1);
+	shrguy->d.size = sz;
+	shrguy->iprops|= THEFLAG;
+
+	
+	minsn_t* xduterm = new minsn_t(i->ea);
+	xduterm->opcode = m_and;
+
+	xduterm->l.assign_insn(shrguy, sz);
+	xduterm->r.make_number(0xFF, sz);
+
+	xduterm->d.size =sz;
+	//highbyte_term->assign_insn(xduterm, 1);
+
+	xduterm->iprops |= THEFLAG;;
+	minsn_t* xduboi2 = new minsn_t(i->ea);
+	xduboi2->opcode = m_xdu;
+
+	xduboi2->l = *nonhighbyte_term;
+
+	
+
+	xduboi2->d.size = sz;
+	xduboi2->iprops |= THEFLAG;
+
+
+	minsn_t* dup = minsn_t::cloneptr(i);
+	dup->l.assign_insn(xduterm,sz);
+	dup->r.assign_insn(xduboi2,sz);
+
+	dup->d.erase();
+	dup->d.size = sz;
+	dup->iprops |= THEFLAG;
+	i->opcode = m_low;
+
+	i->r.erase();
+	i->l.assign_insn(dup,sz);
+
+	i->d.size = 1;
+	i->iprops |= THEFLAG;
+
+	return true;
+}

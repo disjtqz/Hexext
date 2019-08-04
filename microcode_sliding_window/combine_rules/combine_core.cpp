@@ -19,6 +19,10 @@
 #include "rewrite_float_bitops.hpp"
 #include "cleanup_late_flag_ops.hpp"
 #include "memory_oper_rules.hpp"
+#include "pow2_rounding_recognizers.hpp"
+
+#include "bitlogic_misc.hpp"
+
 class negated_sets_t : public mcombiner_rule_t {
 public:
 	virtual bool run_combine(mcombine_t* state);
@@ -345,7 +349,12 @@ static mcombiner_rule_t* g_allrules[] = {
 	& replace_boolean_flow_with_boolean_logic,
 	& merge_short_circuit_or_with_no_side_effects,
 	& merge_multi_setz_chain_interval,
-	& interblock_flagop_merger
+	& interblock_flagop_merger,
+	& recognize_overcombined_round_up_pow2,
+	& setnez_1bit_to_logical_not,
+	& comp1bit_to_jcnd,
+	& sets_sub_to_cmp,
+	& popcnt_bool_fold
 };
 
 void toggle_common_combination_rules(bool enabled) {
@@ -358,7 +367,9 @@ static  mcombiner_rule_t* const g_x86_rules[] = {
 		/*combine_x86_64_bitand_high,
 	combine_x86_64_bitor_high*/
 	&combine_x86_band_high,
-	&combine_x86_bitor_high
+	&combine_x86_bitor_high,
+	//unfortunately highbyte_used_with_lowbyte just gets turned back into highbyte causing an infinite loop
+	//& highbyte_used_with_lowbyte
 };
 
 void toggle_archspec_combination_rules(bool enabled) {

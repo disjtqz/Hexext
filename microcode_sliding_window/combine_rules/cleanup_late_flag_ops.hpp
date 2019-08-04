@@ -16,4 +16,10 @@ COMB_RULE_DECL(merge_multi_setz_chain_interval, "Merge a series of unconditional
 
 COMB_RULE_DECL(interblock_flagop_merger, "Hoist up a blocks operations if they only set flags that are also defed in the sole predecessor")
 
-COMB_RULE_DECL(x_minus_y_lt_zero_cmp, "Transform sign substraction compare to less than signed");
+
+COMB_RULE_DECL(setnez_1bit_to_logical_not, "Transform comparison of boolean against 0 to lnot");
+
+
+COMB_RULE_DECL(comp1bit_to_jcnd, "Convert comparisons of booleans in jne/je to jcnds");
+
+COMB_RULE_DECL(sets_sub_to_cmp, "Convert x-y<0 to x<y?");

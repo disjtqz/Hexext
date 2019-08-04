@@ -31,3 +31,12 @@ void setup_ztest_bitand(minsn_t* into, bool z,  mop_t* l, mop_t* r, unsigned siz
 void insert_mov2_before(ea_t ea,mblock_t* blk, minsn_t* before, mop_t* from, mop_t* to);
 
 void lnot_mop(mop_t* into, mop_t* operand, ea_t ea);
+
+minsn_t* new_helper_late(
+	minsn_t* callins,
+	const char* helper_name,
+	unsigned res_size,
+	unsigned nargs,
+	mcallarg_t* args,
+	tinfo_t* return_type,
+	mop_t* retloc);

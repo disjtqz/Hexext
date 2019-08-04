@@ -1269,3 +1269,7 @@ ivlset_t* __fastcall ivlset_t::copy(const ivlset_t* rhs)
 	while (v7 > rhs->bag_.n);
 	return this;
 }
+
+CS_NOINLINE mlist_t::~mlist_t() {
+
+}

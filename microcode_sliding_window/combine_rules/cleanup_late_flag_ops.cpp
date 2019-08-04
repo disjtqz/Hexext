@@ -1044,13 +1044,127 @@ return true;
 }
 
 
-COMB_RULE_IMPLEMENT(x_minus_y_lt_zero_cmp) {
 
-	auto insn = state->insn();
-	if (insn->op() != m_and)
+COMB_RULE_IMPLEMENT(setnez_1bit_to_logical_not) {
+	minsn_t* insn = state->insn();
+
+	if (insn->op() != m_setz)
 		return false;
 
-	auto [subinsn1, subinsn2] = insn->arrange_by_insn(m_sets, m_setge);
+	
+	auto [num, nonnum] = insn->arrange_by(mop_n);
+	if (!num || num->size != 1 || !num->is_equal_to(0ULL, false))
+		return false;
+
+	potential_valbits_t bts = try_compute_opnd_potential_valbits(nonnum);
+
+	if (!bts.is_boolish())
+		return false;
 
 
+	mop_t lnotop = *nonnum;
+
+	insn->opcode = m_lnot;
+
+	insn->l = lnotop;
+	insn->r.erase();
+	return true;
+	
+}
+//its TIEM
+/*
+
+LABEL_57:
+	  v45 = v3 == 0;
+	  v46 = v3 < 0;
+	  if ( v3 )
+		goto LABEL_60;
+	  free(v19);
+	  return (unsigned int)-1;
+	}
+
+	//later on
+LABEL_60:
+		if ( v46 || v45 )
+		{
+		  free(v19);
+		  return 1;
+		}
+
+
+	we already know that v3 is nonzero if we take this goto because of our condition
+	so v45 will be false, which means its all up to v46
+
+	but if v46 is true, that indicates that v3 is nonzero, which means the branch can be reduced to
+	if (v3 < 0) {
+		free(v19);
+		return 1;
+	}
+
+	which may reduce the interblock dependencies of v45/v46 enough for them to be eliminated and propagated into conditions
+
+	mucho stronger heuristics are needed for this to be as powerful as it could be, but basically heres wat we got
+	we can rely on our interblock short circuit optimizations to juice up the bueno on this one
+
+
+	is insn a goto? check block
+
+	we're just going to check for jcnd/jne 0/je 1, extract the truthy test boi
+
+	truthy boi -> bitor?
+
+	if bitor, extract terms
+
+
+
+
+*/
+COMB_RULE_IMPLEMENT(comp1bit_to_jcnd) {
+	auto i = state->insn();
+
+	if (i->op() != m_jnz && i->op() != m_jz)
+		return false;
+
+	auto [numop, nonnum] = i->arrange_by(mop_n);
+
+	if (!numop)
+		return false;
+	bool inversion_required = false;
+
+	if (i->op() == m_jz && !numop->is_equal_to(1ULL, false))
+		return false;
+
+	if (i->op() == m_jnz && !numop->is_equal_to(0ULL, false))
+		return false;
+
+	potential_valbits_t condrange = try_compute_opnd_potential_valbits(nonnum);
+
+	if (!condrange.is_boolish())
+		return false;
+	i->opcode = m_jcnd;
+	
+	mop_t temp = *nonnum;
+
+	i->l = temp;
+	i->r.erase();
+
+	return true;
+}
+
+COMB_RULE_IMPLEMENT(sets_sub_to_cmp) {
+	auto i = state->insn();
+	if (i->op() != m_sets)
+		return false;
+
+	auto [subinsn, lterm, rterm] = i->l.descend_to_binary_insn(m_sub);
+
+	if (!subinsn)return false;
+
+	i->opcode = m_setb;
+
+	mop_t l = *lterm;
+	mop_t r = *rterm;
+	i->l = l;
+	i->r = r;
+	return true;
 }

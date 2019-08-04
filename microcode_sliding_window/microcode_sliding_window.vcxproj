@@ -357,7 +357,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Chris\Desktop\IDA 7.0\plugins\hexrays_sdk\include;C:\Users\Chris\Desktop\sdk70\idasdk70\include;%(AdditionalIncludeDirectories);$(VC_SourcePath);</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__EA64__;__NT__;__IDP__;__UI__;BUILD_64;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPRT_MICROCODE;__X64__;__EA64__;__NT__;__IDP__;BUILD_64;</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <SupportJustMyCode>true</SupportJustMyCode>
       <ExceptionHandling>false</ExceptionHandling>
@@ -382,13 +382,14 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Chris\Desktop\IDA 7.0\plugins\hexrays_sdk\include;C:\Users\Chris\Desktop\sdk70\idasdk70\include;%(AdditionalIncludeDirectories);$(VC_SourcePath);</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__NT__;__IDP__;__UI__;BUILD_64;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__NT__;__IDP__;BUILD_64;</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <SupportJustMyCode>true</SupportJustMyCode>
       <ExceptionHandling>false</ExceptionHandling>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DisableSpecificWarnings>C4530</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalOptions>/EXPORT:PLUGIN %(AdditionalOptions)</AdditionalOptions>
@@ -407,7 +408,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Chris\Desktop\IDA 7.0\plugins\hexrays_sdk\include;C:\Users\Chris\Desktop\sdk70\idasdk70\include;%(AdditionalIncludeDirectories);$(VC_SourcePath);</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__NT__;__IDP__;__UI__;BUILD_64;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__NT__;__IDP__;BUILD_64;NDEBUG;</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <SupportJustMyCode>false</SupportJustMyCode>
       <ExceptionHandling>false</ExceptionHandling>
@@ -446,7 +447,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Chris\Desktop\IDA 7.0\plugins\hexrays_sdk\include;C:\Users\Chris\Desktop\sdk70\idasdk70\include;%(AdditionalIncludeDirectories);$(VC_SourcePath);</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__EA64__;__NT__;__IDP__;__UI__;BUILD_64;HEXEXT_RELEASE;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);BACKPORT_MICROCODE;__X64__;__EA64__;__NT__;__IDP__;BUILD_64;HEXEXT_RELEASE;</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <SupportJustMyCode>false</SupportJustMyCode>
       <ExceptionHandling>false</ExceptionHandling>
@@ -538,6 +539,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="combine_rules\add_masked_one_conditional.cpp" />
+    <ClCompile Include="combine_rules\bitlogic_misc.cpp" />
     <ClCompile Include="combine_rules\bitor_followed_by_signbit_extrq.cpp" />
     <ClCompile Include="combine_rules\bnot_and_low.cpp" />
     <ClCompile Include="combine_rules\bytewise_shift.cpp" />
@@ -551,6 +553,7 @@
     <ClCompile Include="combine_rules\division_magic_number_rules.cpp" />
     <ClCompile Include="combine_rules\div_and_mul_by_same_const_to_mask.cpp" />
     <ClCompile Include="combine_rules\memory_oper_rules.cpp" />
+    <ClCompile Include="combine_rules\popcnt_recognizers.cpp" />
     <ClCompile Include="combine_rules\pow2_rounding_recognizers.cpp" />
     <ClCompile Include="combine_rules\raise_bitlut_test_to_multieq_compare.cpp" />
     <ClCompile Include="combine_rules\rewrite_float_bitops.cpp" />
@@ -596,6 +599,7 @@
     <ClInclude Include="canon\bitsim\bitsim_impl.hpp" />
     <ClInclude Include="canon\canon.hpp" />
     <ClInclude Include="combine_rules\add_masked_one_conditional.hpp" />
+    <ClInclude Include="combine_rules\bitlogic_misc.hpp" />
     <ClInclude Include="combine_rules\bitor_followed_by_signbit_extrq.hpp" />
     <ClInclude Include="combine_rules\bnot_and_low.hpp" />
     <ClInclude Include="combine_rules\bytewise_shift.hpp" />
@@ -610,6 +614,7 @@
     <ClInclude Include="combine_rules\division_magic_number_rules.hpp" />
     <ClInclude Include="combine_rules\div_and_mul_by_same_const_to_mask.hpp" />
     <ClInclude Include="combine_rules\memory_oper_rules.hpp" />
+    <ClInclude Include="combine_rules\popcnt_recognizers.hpp" />
     <ClInclude Include="combine_rules\pow2_rounding_recognizers.hpp" />
     <ClInclude Include="combine_rules\raise_bitlut_test_to_multieq_compare.hpp" />
     <ClInclude Include="combine_rules\rewrite_float_bitops.hpp" />
@@ -644,6 +649,7 @@
     <ClInclude Include="hexutils\hexutils.hpp" />
     <ClInclude Include="hexutils\micropool.hpp" />
     <ClInclude Include="hexutils\micro_executor_template.hpp" />
+    <ClInclude Include="hexutils\moptrace.hpp" />
     <ClInclude Include="hexutils\smaller_bitsets.hpp" />
     <ClInclude Include="hexutils\traverse_micro.hpp" />
     <ClInclude Include="internal\idaregs_x86_64.hpp" />

@@ -203,3 +203,49 @@ bool __fastcall mop_t::is_constant(uint64_t* out, bool is_signed) const
 		* out = extend_value_by_size_and_sign(targetmop->nnn->org_value, targetmop->size, is_signed);
 	return 1;
 }
+CS_NOINLINE
+bool mop_t::lvalue_equal(mop_t* mop) {
+	if (!is_lvalue())
+		return false;
+
+	if (t != mop->t)
+		return false;
+
+	if (size != mop->size)
+		return false;
+	if (t == mop_r)
+		return r == mop->r;
+	else if (t == mop_S) {
+		return s->off == mop->s->off;
+	}
+	else if (t == mop_v) {
+		return g == mop->g;
+	}
+	else if (t == mop_l) {
+		return l->idx == mop->l->idx;
+	}
+	else
+		return false;
+}
+CS_NOINLINE
+bool mop_t::lvalue_equal_ignore_size(mop_t* mop) {
+	if (!is_lvalue())
+		return false;
+
+	if (t != mop->t)
+		return false;
+
+	if (t == mop_r)
+		return r == mop->r;
+	else if (t == mop_S) {
+		return s->off == mop->s->off;
+	}
+	else if (t == mop_v) {
+		return g == mop->g;
+	}
+	else if (t == mop_l) {
+		return l->idx == mop->l->idx;
+	}
+	else
+		return false;
+}

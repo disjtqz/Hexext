@@ -474,7 +474,7 @@ minsn_t* find_redefinition(mblock_t* CS_RESTRICT blk, minsn_t* CS_RESTRICT insn,
 	return nullptr;
 }
 
-minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed) {
+minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed, minsn_t** redefptr) {
 	minsn_t* curr = insn->next;
 	mlist_t l;
 	mlist_t def;
@@ -492,14 +492,22 @@ minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redef
 
 		if (def.mem.has_common_(&mlist->mem) || def.reg.has_common(mlist->reg))
 		{
-			if (redefed)
-				* redefed = true;
+			if (redefed) {
+				*redefed = true;
+				*redefptr = curr;
+			}
 			return nullptr;
 		}
 
 	}
 	return nullptr;
 }
+minsn_t* find_next_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* redefed) {
+	minsn_t* unused_redefptr;
+	return find_next_use(blk, insn, mlist, redefed, &unused_redefptr);
+}
+
+
 minsn_t* find_prev_use(mblock_t* blk, minsn_t* insn, mlist_t* mlist, bool* defed) {
 	minsn_t* curr = insn->prev;
 	mlist_t l{};
@@ -1035,12 +1043,21 @@ static bool gather_single_block_uses(fixed_size_vecptr_t<minsn_t*> uses, minsn_t
 
 	minsn_t* pos = start;
 	bool redefed = false;
-
-	while ((pos = (prior ? find_prev_use : find_next_use)(blk, pos, list, &redefed)) && !redefed) {
-		if (!uses->push_back(pos)) {
-			return false;
+	if (prior) {
+		while ((pos = find_prev_use (blk, pos, list, &redefed)) && !redefed) {
+			if (!uses->push_back(pos)) {
+				return false;
+			}
 		}
 	}
+	else {
+		while ((pos = find_next_use(blk, pos, list, &redefed)) && !redefed) {
+			if (!uses->push_back(pos)) {
+				return false;
+			}
+		}
+	}
+
 
 	return redefed;
 }

@@ -88,9 +88,9 @@ static bool do_rbit(mop_t* argument, potential_valbits_t* out) {
 }
 
 
-static bool compute_intrinsic_valbits(mop_t* op, exrole_t role, potential_valbits_t* out) {
+static bool compute_intrinsic_valbits(minsn_t* d, exrole_t role, potential_valbits_t* out) {
 
-	mcallinfo_t* callinf = op->d->d.f;
+	mcallinfo_t* callinf = d->d.f;
 
 	cs_assert(callinf);
 
@@ -138,8 +138,7 @@ static bool compute_intrinsic_valbits(mop_t* op, exrole_t role, potential_valbit
 }
 
 
-static bool compute_commutative_valbits(mop_t* op, potential_valbits_t* out) {
-	auto d = op->d;
+static bool compute_commutative_valbits(minsn_t* d, potential_valbits_t* out) {
 	mcode_t opc = d->opcode;
 
 	potential_valbits_t lbits = try_compute_opnd_potential_valbits(&d->l),
@@ -163,7 +162,7 @@ static bool compute_commutative_valbits(mop_t* op, potential_valbits_t* out) {
 			out->m_underlying = lbits.m_underlying | rbits.m_underlying;
 		}
 		else {
-			out->m_underlying = extend_value_by_size_and_sign(~0ULL, op->size, false);//add_bitmag(lbits.m_underlying, rbits.m_underlying, op->size);
+			out->m_underlying = extend_value_by_size_and_sign(~0ULL, d->d.size, false);//add_bitmag(lbits.m_underlying, rbits.m_underlying, op->size);
 		}
 
 
@@ -171,8 +170,8 @@ static bool compute_commutative_valbits(mop_t* op, potential_valbits_t* out) {
 	}
 }
 
-static bool compute_inner_insn_valbits(mop_t* op, potential_valbits_t* out) {
-	minsn_t* d = op->d;
+static bool compute_inner_insn_valbits(minsn_t* d, potential_valbits_t* out) {
+
 	if (mcode_is_set(d->opcode) || d->opcode == m_cfadd || d->opcode == m_ofadd) {
 		out->m_underlying = 1ULL;
 
@@ -186,13 +185,13 @@ static bool compute_inner_insn_valbits(mop_t* op, potential_valbits_t* out) {
 
 		out->m_underlying <<= constmul.shiftcount();
 
-		out->m_underlying = extend_value_by_size_and_sign(out->m_underlying, op->size, false);
+		out->m_underlying = extend_value_by_size_and_sign(out->m_underlying, d->d.size, false);
 		return true;
 	}
 
 	xdu_extraction_t xduext{};
 
-	if (try_extract_xdu(op, &xduext)) {
+	if (try_extract_xdu(d, &xduext)) {
 		*out = try_compute_opnd_potential_valbits(xduext.xdu_operand());
 
 		out->m_underlying = extend_value_by_size_and_sign(out->m_underlying, xduext.fromsize(), false);
@@ -208,20 +207,25 @@ static bool compute_inner_insn_valbits(mop_t* op, potential_valbits_t* out) {
 	}
 
 	if (is_mcode_commutative(d->opcode)) {
-		return compute_commutative_valbits(op, out);
+		return compute_commutative_valbits(d, out);
 	}
 	
 	exrole_t exrole = get_instruction_exrole(d);
 
 	if (exrole != exrole_t::none) {
-		return compute_intrinsic_valbits(op, exrole, out);
+		return compute_intrinsic_valbits(d, exrole, out);
 	}
 	
 	return false;
 	
 
 }
-
+potential_valbits_t try_compute_insn_potential_valbits(minsn_t* insn) {
+	potential_valbits_t out{};
+	out.m_underlying = lut_sizemask[_tzcnt_u32(insn->d.size)];
+	compute_inner_insn_valbits(insn, &out);
+	return out;
+}
 
 potential_valbits_t try_compute_opnd_potential_valbits(mop_t* op)
 {
@@ -229,7 +233,7 @@ potential_valbits_t try_compute_opnd_potential_valbits(mop_t* op)
 
 	out.m_underlying = lut_sizemask[_tzcnt_u32(op->size)];
 	if (op->t == mop_d) {
-		compute_inner_insn_valbits(op, &out);
+		compute_inner_insn_valbits(op->d, &out);
 	}
 	else if (op->t == mop_n) {
 		out.m_underlying = op->nnn->value;
